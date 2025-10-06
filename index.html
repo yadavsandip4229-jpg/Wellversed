@@ -1,158 +1,125 @@
 <!doctype html>
 <html lang="hi">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Wellversed-like Demo Store</title>
-<style>
-/* ---- styling वही रखी गई है ---- */
-:root{
-  --accent:#22b8b0;--muted:#8b9aa3;--card:#ffffff;--bg:#f4f6f7;--danger:#e74c3c;--success:#2ecc71;
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,Roboto,'Noto Sans',sans-serif;background:var(--bg);color:#0b2540;}
-a{color:inherit;text-decoration:none}
-header{background:#fff;padding:12px 14px;border-bottom:1px solid #e6eef0;position:sticky;top:0;z-index:40}
-.top{display:flex;align-items:center;gap:12px;max-width:1100px;margin:0 auto}
-.brand{color:var(--accent);font-weight:700;font-size:20px}
-.search{flex:1}
-.search input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #e0eceb;font-size:14px}
-.icon-btn{width:36px;height:36px;border-radius:8px;background:#f1fbfa;display:flex;align-items:center;justify-content:center}
-main{max-width:1100px;margin:14px auto;padding:0 14px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.card{background:var(--card);border-radius:12px;padding:10px;box-shadow:0 6px 20px rgba(10,30,40,0.04);}
-.card img{width:100%;height:130px;object-fit:contain;border-radius:8px;background:#fafafa}
-.add{display:inline-block;margin-top:10px;padding:10px;border-radius:10px;border:2px solid var(--accent);background:#fff;cursor:pointer;font-weight:700}
-.cartbar{position:fixed;left:12px;right:12px;bottom:12px;background:var(--accent);padding:12px 16px;color:#fff;display:flex;align-items:center;justify-content:space-between;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,0.12);z-index:50}
-.cartbar .btn{background:#fff;color:var(--accent);padding:8px 10px;border-radius:8px;border:none;font-weight:700;cursor:pointer}
-.drawer{position:fixed;right:0;left:0;bottom:0;height:86vh;background:#fff;border-top-left-radius:14px;border-top-right-radius:14px;box-shadow:0 -6px 30px rgba(0,0,0,0.12);padding:12px 14px;transform:translateY(100%);transition:transform .25s ease;z-index:70;display:flex;flex-direction:column}
-.drawer.open{transform:translateY(0)}
-#successToast{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:40px;background:var(--success);color:#fff;padding:12px 16px;border-radius:8px;z-index:90}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wellversed - Demo Store</title>
+  <style>
+    :root{--accent:#22b8b0;--card:#fff;--muted:#777}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans',sans-serif;margin:0;background:#f6f8f9;color:#0b2540}
+    header{background:#fff;padding:18px 16px;border-bottom:1px solid #e6eef0;position:sticky;top:0;z-index:20}
+    .top{display:flex;align-items:center;gap:12px}
+    .brand{color:var(--accent);font-weight:700;font-size:28px}
+    .search{flex:1;margin-left:8px}
+    .search input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #e0eceb}
+    main{padding:18px}
+    .controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .filters{background:#fff;padding:10px;border-radius:8px;box-shadow:0 1px 0 rgba(0,0,0,0.03)}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .card{background:var(--card);border-radius:12px;padding:12px;box-shadow:0 6px 20px rgba(10,30,40,0.04);position:relative}
+    .card img{width:100%;height:120px;object-fit:contain;border-radius:8px;background:#fafafa}
+    .rating{position:absolute;left:12px;top:12px;background:#18a999;color:#fff;padding:6px 8px;border-radius:8px;font-weight:700}
+    .veg{position:absolute;right:12px;top:12px;border-radius:4px;padding:4px;background:#fff;border:1px solid #e6f2f0}
+    .title{margin-top:10px;font-weight:600}
+    .price{margin-top:6px;font-weight:700}
+    .old{color:var(--muted);text-decoration:line-through;font-weight:500;margin-left:8px;font-size:14px}
+    .off{color:#0aa64a;font-weight:700;margin-top:4px}
+    .add{display:inline-block;margin-top:10px;padding:10px 12px;border-radius:10px;border:2px solid var(--accent);background:#fff;cursor:pointer}
+    .add.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .cartbar{position:fixed;left:0;right:0;bottom:0;background:var(--accent);padding:12px 16px;color:#fff;display:flex;align-items:center;justify-content:space-between;border-top-left-radius:8px;border-top-right-radius:8px}
+    .small{font-size:14px}
+    #successToast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#0aa64a;color:white;padding:12px 20px;border-radius:10px;display:none;font-weight:600;}
+    @media(min-width:900px){.grid{grid-template-columns:repeat(4,1fr)}}
+  </style>
 </head>
 <body>
+  <header>
+    <div class="top">
+      <div class="brand">wellversed<span style="font-weight:400;color:#4a6570">™</span></div>
+      <div class="search"><input id="q" placeholder="Search for Health Products" oninput="searchProducts()"/></div>
+      <div style="width:36px;height:36px;border-radius:8px;background:#f1fbfa;display:flex;align-items:center;justify-content:center">♡</div>
+    </div>
+  </header>
 
-<header>
-  <div class="top">
-    <div class="brand">wellversed™</div>
-    <div class="search"><input id="searchInput" placeholder="Search products" oninput="onSearch()" /></div>
-    <div class="icon-btn">♡</div>
+  <main>
+    <div class="controls">
+      <div class="filters">Filters</div>
+      <div class="sort">Sort by: <button onclick="sortBy()">⇅</button></div>
+    </div>
+    <section class="grid" id="products"></section>
+  </main>
+
+  <div class="cartbar" id="cartbar" style="display:none">
+    <div>🛒 <span id="cart-count">0</span> items • ₹<span id="cart-total">0</span></div>
+    <div><button style="padding:8px 12px;border-radius:8px;border:none;background:#fff;color:var(--accent);font-weight:700" onclick="checkout()">VIEW CART</button></div>
   </div>
-</header>
 
-<main>
-  <section class="grid" id="productGrid"></section>
-</main>
+  <div id="successToast">✅ Payment Successful! Order placed.</div>
 
-<div class="cartbar" id="cartbar" style="display:none">
-  <div>🛒 <span id="cartCount">0</span> items • ₹<span id="cartTotal">0</span></div>
-  <div><button class="btn" onclick="openDrawer()">VIEW CART</button></div>
-</div>
+  <script>
+    const PRODUCTS = [
+      {id:1,title:'Wellcore - Micronised Creatine',price:569,old:749,rate:4.9,img:'https://via.placeholder.com/300x180?text=Creatine'},
+      {id:2,title:'Wellcore - Pure Micronised',price:569,old:749,rate:4.9,img:'https://via.placeholder.com/300x180?text=Pure+Creatine'},
+      {id:3,title:'Whey Protein - 1kg',price:1299,old:1499,rate:4.7,img:'https://via.placeholder.com/300x180?text=Whey'},
+      {id:4,title:'Pre-Workout - 300g',price:899,old:1099,rate:4.6,img:'https://via.placeholder.com/300x180?text=Pre-Workout'}
+    ];
 
-<div class="drawer" id="cartDrawer">
-  <div style="display:flex;justify-content:space-between;align-items:center">
-    <div><b>Your Cart</b></div>
-    <button onclick="closeDrawer()" style="border:none;background:none;font-size:20px">✕</button>
-  </div>
-  <div id="cartItems" style="flex:1;overflow:auto;margin-top:10px"></div>
-  <div style="margin-top:auto">
-    <button onclick="openCheckout()" style="width:100%;padding:12px;border:none;background:var(--accent);color:#fff;border-radius:10px;font-weight:700">Checkout</button>
-  </div>
-</div>
+    let cart = {count:0,total:0,items:[]};
 
-<!-- Payment success -->
-<div id="successToast">भुगतान सफल! आपका ऑर्डर प्लेस हो गया ✅</div>
+    function renderProducts(list){
+      const container = document.getElementById('products'); container.innerHTML='';
+      list.forEach(p=>{
+        const c=document.createElement('div'); c.className='card';
+        c.innerHTML=`
+          <div class="rating">${p.rate} ★</div>
+          <div class="veg">●</div>
+          <img src="${p.img}" alt="${p.title}" />
+          <div class="title">${p.title}</div>
+          <div class="price">₹${p.price} <span class="old">₹${p.old}</span></div>
+          <div class="off">${Math.round((1 - p.price/p.old)*100)}% off</div>
+          <button class="add primary" onclick="addToCart(${p.id})">Add to cart</button>`;
+        container.appendChild(c);
+      });
+    }
 
-<script>
-// ========== CONFIG ==========
-const MERCHANT_UPI = "yourname@upi"; // ← यहां अपना असली UPI ID डालें
-const PRODUCTS = [
-  {id:1,title:"Whey Protein",price:999,img:"https://via.placeholder.com/300x180?text=Whey"},
-  {id:2,title:"Creatine Monohydrate",price:699,img:"https://via.placeholder.com/300x180?text=Creatine"},
-  {id:3,title:"Pre Workout",price:499,img:"https://via.placeholder.com/300x180?text=Preworkout"}
-];
+    function addToCart(id){
+      const p = PRODUCTS.find(x=>x.id===id);
+      cart.count += 1; cart.total += p.price; cart.items.push(p);
+      document.getElementById('cart-count').textContent = cart.count;
+      document.getElementById('cart-total').textContent = cart.total;
+      document.getElementById('cartbar').style.display = 'flex';
+    }
 
-let cart = [];
+    function sortBy(){
+      PRODUCTS.reverse();
+      renderProducts(PRODUCTS);
+    }
 
-// ========== PRODUCT RENDER ==========
-function renderProducts(){
-  const grid=document.getElementById("productGrid");
-  grid.innerHTML="";
-  PRODUCTS.forEach(p=>{
-    grid.innerHTML+=`
-      <div class="card">
-        <img src="${p.img}"/><div><b>${p.title}</b></div>
-        <div>₹${p.price}</div>
-        <button class="add" onclick="addToCart(${p.id})">Add</button>
-      </div>`;
-  });
-}
-renderProducts();
+    function searchProducts(){
+      const q = document.getElementById('q').value.toLowerCase();
+      const filtered = PRODUCTS.filter(p => p.title.toLowerCase().includes(q));
+      renderProducts(filtered);
+    }
 
-// ========== CART ==========
-function addToCart(id){
-  const prod=PRODUCTS.find(p=>p.id===id);
-  const existing=cart.find(i=>i.id===id);
-  if(existing) existing.qty++;
-  else cart.push({...prod,qty:1});
-  updateCart();
-}
-function updateCart(){
-  document.getElementById("cartCount").textContent=cart.reduce((a,b)=>a+b.qty,0);
-  document.getElementById("cartTotal").textContent=cart.reduce((a,b)=>a+b.price*b.qty,0);
-  document.getElementById("cartbar").style.display="flex";
-}
-function openDrawer(){
-  document.getElementById("cartDrawer").classList.add("open");
-  renderCartItems();
-}
-function closeDrawer(){
-  document.getElementById("cartDrawer").classList.remove("open");
-}
-function renderCartItems(){
-  const div=document.getElementById("cartItems");
-  div.innerHTML="";
-  cart.forEach((i,idx)=>{
-    div.innerHTML+=`
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div>${i.title} x${i.qty}</div>
-        <div>₹${i.price*i.qty}</div>
-      </div>`;
-  });
-}
+    function checkout(){
+      // ✅ UPI Payment Redirect
+      const upiID = "merchant@upi"; // ← इसे अपने असली UPI ID से बदलें
+      const amount = cart.total;
+      const name = "Wellversed Store";
+      const note = "Order Payment";
+      const upiLink = `upi://pay?pa=${upiID}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+      window.location.href = upiLink;
 
-// ========== CHECKOUT ==========
-function openCheckout(){
-  const total=cart.reduce((a,b)=>a+b.price*b.qty,0);
-  if(total<=0){alert("Cart empty");return;}
-  // UPI deep link
-  const name="Demo Store";
-  const txnid="T"+Date.now();
-  const note="Order Payment";
-  const url=`upi://pay?pa=${MERCHANT_UPI}&pn=${encodeURIComponent(name)}&am=${total}&tn=${encodeURIComponent(note)}&cu=INR&tr=${txnid}`;
-  // redirect
-  window.location.href=url;
-  // after redirect, show success
-  setTimeout(()=>{
-    document.getElementById("successToast").style.display="block";
-    setTimeout(()=>document.getElementById("successToast").style.display="none",4000);
-    cart=[];updateCart();closeDrawer();
-  },4000);
-}
+      // Show success message after 5 sec (demo)
+      setTimeout(()=>{
+        cart = {count:0,total:0,items:[]};
+        document.getElementById('cartbar').style.display='none';
+        document.getElementById('successToast').style.display='block';
+        setTimeout(()=>document.getElementById('successToast').style.display='none',4000);
+      },5000);
+    }
 
-// ========== SEARCH ==========
-function onSearch(){
-  const q=document.getElementById("searchInput").value.toLowerCase();
-  const f=PRODUCTS.filter(p=>p.title.toLowerCase().includes(q));
-  const grid=document.getElementById("productGrid");
-  grid.innerHTML="";
-  f.forEach(p=>{
-    grid.innerHTML+=`
-      <div class="card"><img src="${p.img}"/><div><b>${p.title}</b></div>
-      <div>₹${p.price}</div>
-      <button class="add" onclick="addToCart(${p.id})">Add</button></div>`;
-  });
-}
-</script>
+    renderProducts(PRODUCTS);
+  </script>
 </body>
 </html>
