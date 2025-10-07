@@ -217,4 +217,338 @@
       <div style="font-weight:700;margin-bottom:6px">Offers & Rewards</div>
       <div style="display:flex;gap:8px">
         <input id="checkoutCoupon" placeholder="Enter coupon code (SAVE50)" style="flex:1;padding:10px;border-radius:8px;border:1px solid #eef3f4"/>
-        <button onclick="applyCheckoutCoupon()" style="padding:10px 12px;bo
+        <button onclick="applyCheckoutCoupon()" style="padding:10px 12px;border-radius:8px;background:var(--accent);color:#fff;border:none">Apply</button>
+      </div>
+      <div class="muted" id="checkoutCouponMsg" style="margin-top:8px"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:10px">
+        <div class="muted">Redeem Reward Points worth ₹50</div>
+        <div><button onclick="applyPoints()" style="padding:6px 8px;border-radius:8px;background:#f0f8f7;border:none">Redeem</button></div>
+      </div>
+    </div>
+
+    <!-- Payment Options -->
+    <div style="background:#fff;padding:12px;border-radius:10px;margin-bottom:12px;box-shadow:0 6px 18px rgba(10,30,40,0.04)">
+      <div style="font-weight:700;margin-bottom:8px">Payment Options</div>
+      <div class="pay-options" style="margin-bottom:12px">
+        <div class="pay-card" onclick="startPayment('PhonePe')">PhonePe</div>
+        <div class="pay-card" onclick="startPayment('GPay')">GPay</div>
+        <div class="pay-card" onclick="startPayment('Paytm')">Paytm</div>
+        <div class="pay-card" onclick="startPayment('COD')">COD</div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-bottom:20px">
+        <button onclick="startPayment('GPay')" style="flex:1;background:var(--accent);color:#fff;padding:12px;border-radius:10px;border:none;font-weight:800">Pay ₹<span id="placeOrderAmt">0</span></button>
+        <button onclick="startPayment('COD')" style="flex:1;background:#fff;border:1px solid #e6eef0;padding:12px;border-radius:10px;font-weight:800">Pay on Delivery</button>
+      </div>
+    </div>
+
+    <div class="muted center" style="padding-bottom:20px">Powered by Demo Payment</div>
+  </div>
+</div>
+
+<!-- success box -->
+<div id="successBox">✅ Payment successful — आपका ऑर्डर confirm हो गया है।</div>
+
+<script>
+/* ---------------------------
+   Config & products (no design changes)
+   --------------------------- */
+const MERCHANT_UPI = "merchant@upi"; // ← **इसे अपना असली UPI ID डालें** (उदाहरण: sandeepyadav@paytm)
+const PRODUCTS = [
+  {id:1,title:'Wellcore - Pure Micronised Creatine Monohydrate (122g)',price:569,old:749,rate:4.9,img:'https://via.placeholder.com/300x180?text=Creatine+Fruit'},
+  {id:2,title:'Wellcore - Micronised Creatine (300g)',price:999,old:1299,rate:4.8,img:'https://via.placeholder.com/300x180?text=Creatine+300g'},
+  {id:3,title:'Whey Protein Isolate 1kg',price:2199,old:2499,rate:4.7,img:'https://via.placeholder.com/300x180?text=Whey+1kg'},
+  {id:4,title:'Pre-Workout Formula 300g',price:899,old:1099,rate:4.6,img:'https://via.placeholder.com/300x180?text=Pre-Workout'},
+  {id:5,title:'BCAA 200g',price:699,old:899,rate:4.5,img:'https://via.placeholder.com/300x180?text=BCAA'}
+];
+
+let cart = {items:[],count:0,total:0,oldTotal:0,coupon:null,pointsApplied:false};
+let appliedCheckoutCoupon = null;
+
+/* ---------- render product grid (unchanged) ---------- */
+function renderProducts(list=PRODUCTS){
+  const grid = document.getElementById('productGrid');
+  grid.innerHTML='';
+  list.forEach(p=>{
+    const div = document.createElement('div'); div.className='card';
+    div.innerHTML = `
+      <div class="rating">${p.rate} ★</div>
+      <div class="veg">●</div>
+      <img src="${p.img}" alt="${p.title}" />
+      <div class="title">${p.title}</div>
+      <div class="price-row"><div><span class="price">₹${p.price}</span><span class="old">₹${p.old}</span></div><div class="muted">${Math.round((1-p.price/p.old)*100)}% off</div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <button class="add" onclick="addToCart(${p.id})">+ Add</button>
+        <button class="add primary" onclick="quickBuy(${p.id})">Buy</button>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+renderProducts();
+
+/* ----------- search -------------- */
+function onSearch(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if(!q){ renderProducts(); return; }
+  const filtered = PRODUCTS.filter(p => p.title.toLowerCase().includes(q));
+  renderProducts(filtered);
+}
+
+/* ---------- cart functions (unchanged behavior) ---------- */
+function addToCart(id){
+  const prod = PRODUCTS.find(p=>p.id===id);
+  const found = cart.items.find(i=>i.id===id);
+  if(found){ found.qty++; }
+  else{ cart.items.push({...prod,qty:1}); }
+  recalcCart();
+  showCartbar();
+}
+
+function quickBuy(id){
+  addToCart(id);
+  openDrawer();
+}
+
+function recalcCart(){
+  cart.count = cart.items.reduce((s,i)=>s+i.qty,0);
+  cart.total = cart.items.reduce((s,i)=>s + i.price * i.qty,0);
+  cart.oldTotal = cart.items.reduce((s,i)=>s + i.old * i.qty,0);
+  // apply checkout coupon if already applied
+  if(appliedCheckoutCoupon === 'SAVE50' && cart.total >= 50){
+    cart.totalAfterCoupon = Math.max(0, cart.total - 50);
+  } else {
+    cart.totalAfterCoupon = cart.total;
+  }
+  if(cart.pointsApplied){ cart.totalAfterCoupon = Math.max(0, cart.totalAfterCoupon - 50); }
+  updateUI();
+}
+
+function updateUI(){
+  document.getElementById('cartCount').textContent = cart.count;
+  document.getElementById('cartTotal').textContent = cart.totalAfterCoupon || cart.total;
+  document.getElementById('cartCountHeading').textContent = cart.count;
+  document.getElementById('finalTotal').textContent = cart.totalAfterCoupon || cart.total;
+  document.getElementById('savedAmt').textContent = Math.max(0, cart.oldTotal - (cart.totalAfterCoupon || cart.total));
+  document.getElementById('oldTotalStr').textContent = cart.oldTotal ? '₹' + cart.oldTotal : '';
+  document.getElementById('placeOrderAmt').textContent = cart.totalAfterCoupon || cart.total;
+  // progress bar toward 1999 (example)
+  const pct = Math.min(100, Math.round(((cart.totalAfterCoupon || cart.total) / 1999) * 100));
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+/* ---------- Drawer open/close & render items ---------- */
+function showCartbar(){ document.getElementById('cartbar').style.display = cart.count ? 'flex' : 'none'; }
+function openDrawer(){
+  document.getElementById('backdrop').style.display='block';
+  const dr = document.getElementById('cartDrawer');
+  dr.classList.add('open'); dr.setAttribute('aria-hidden','false');
+  renderCartItems();
+}
+function closeDrawer(){
+  document.getElementById('backdrop').style.display='none';
+  const dr = document.getElementById('cartDrawer');
+  dr.classList.remove('open'); dr.setAttribute('aria-hidden','true');
+}
+
+function renderCartItems(){
+  const container = document.getElementById('cartItemsContainer');
+  container.innerHTML = '';
+  if(cart.items.length===0){
+    container.innerHTML = '<div class="muted center" style="padding:20px">Your cart is empty</div>';
+    return;
+  }
+  cart.items.forEach((it, idx)=>{
+    const el = document.createElement('div'); el.className='cart-item';
+    el.innerHTML = `
+      <img src="${it.img}" alt="">
+      <div class="cart-meta">
+        <div style="font-weight:700">${it.title}</div>
+        <div class="muted">₹${it.price} <span class="old">₹${it.old}</span></div>
+        <div class="qty">
+          <button onclick="decreaseQty(${it.id})">-</button>
+          <div style="min-width:28px;text-align:center">${it.qty}</div>
+          <button onclick="increaseQty(${it.id})">+</button>
+          <button class="trash" title="Remove" onclick="removeFromCart(${it.id})">🗑</button>
+        </div>
+      </div>
+    `;
+    container.appendChild(el);
+  });
+  renderBundle();
+}
+
+/* ---------- qty / remove ---------- */
+function increaseQty(id){
+  const it = cart.items.find(i=>i.id===id); if(it){ it.qty++; recalcCart(); renderCartItems(); }
+}
+function decreaseQty(id){
+  const it = cart.items.find(i=>i.id===id); if(!it) return;
+  if(it.qty>1){ it.qty--; } else { cart.items = cart.items.filter(i=>i.id!==id); }
+  recalcCart(); renderCartItems();
+}
+function removeFromCart(id){
+  cart.items = cart.items.filter(i=>i.id!==id);
+  recalcCart(); renderCartItems();
+}
+
+/* ---------- coupons (SAVE50) ---------- */
+function applyCoupon(){
+  const code = (document.getElementById('couponInput').value || '').trim().toUpperCase();
+  if(!code){ document.getElementById('couponMsg').textContent = 'Please enter a coupon code'; return; }
+  if(code !== 'SAVE50'){ document.getElementById('couponMsg').textContent = 'Invalid coupon'; return; }
+  // apply to cart
+  appliedCheckoutCoupon = 'SAVE50';
+  recalcCart();
+  document.getElementById('couponMsg').textContent = 'Coupon applied: ' + code + ' (₹50 off)';
+  document.getElementById('checkoutCouponMsg').textContent = '';
+}
+
+function applyCheckoutCoupon(){
+  const code = (document.getElementById('checkoutCoupon').value || '').trim().toUpperCase();
+  if(!code){ document.getElementById('checkoutCouponMsg').textContent = 'Enter coupon code'; return; }
+  if(code !== 'SAVE50'){ document.getElementById('checkoutCouponMsg').textContent = 'Invalid coupon'; return; }
+  appliedCheckoutCoupon = 'SAVE50';
+  recalcCart();
+  document.getElementById('checkoutCouponMsg').textContent = 'Coupon applied: SAVE50 (₹50 off)';
+}
+
+/* ---------- bundle suggestions ---------- */
+function renderBundle(){
+  const list = document.getElementById('bundleList'); list.innerHTML='';
+  const others = PRODUCTS.slice(0,4);
+  others.forEach(p=>{
+    const node = document.createElement('div'); node.className='bundle-card';
+    node.innerHTML = `<img src="${p.img}" style="width:100%;height:90px;object-fit:contain;border-radius:8px"/><div style="font-weight:700;margin-top:6px;font-size:14px">${p.title.split(' ')[0]}</div><div class="muted old">₹${p.old}</div><div style="font-weight:800">₹${p.price}</div><div style="margin-top:8px;text-align:center"><button style="padding:6px 8px;border-radius:8px;border:1px solid var(--accent);background:#fff;color:var(--accent)" onclick="addToCart(${p.id})">+ Add</button></div>`;
+    list.appendChild(node);
+  });
+}
+
+/* ---------- checkout flow & UPI redirect ---------- */
+function openCheckout(){
+  if(cart.items.length===0){ alert('Cart is empty'); return; }
+  closeDrawer();
+  document.getElementById('checkoutModal').style.display='flex';
+  document.getElementById('checkoutTotal').textContent = cart.totalAfterCoupon || cart.total;
+  document.getElementById('placeOrderAmt').textContent = cart.totalAfterCoupon || cart.total;
+  document.getElementById('checkoutSaved').textContent = 'You saved ₹' + Math.max(0, cart.oldTotal - (cart.totalAfterCoupon || cart.total)) + ' so far';
+  document.getElementById('deliverTo').textContent = localStorage.getItem('demo_addr') || 'Enter details below';
+}
+
+function closeCheckout(){ document.getElementById('checkoutModal').style.display='none'; }
+
+function editAddress(){
+  const name = prompt('Enter name', 'First Last');
+  const addr = prompt('Enter address', 'House, Street, City - PIN');
+  if(name && addr){
+    localStorage.setItem('demo_addr', name + ', ' + addr);
+    document.getElementById('deliverTo').textContent = localStorage.getItem('demo_addr');
+  }
+}
+
+function applyPoints(){
+  cart.pointsApplied = true; recalcCart();
+  alert('Points applied: ₹50 discount');
+}
+
+/* ---------- startPayment: validate form, set pending, redirect to UPI ---------- */
+function startPayment(method){
+  // if COD
+  if(method === 'COD'){
+    // simple COD flow: place order without UPI
+    placeOrderSuccess('COD');
+    return;
+  }
+
+  // collect form values and validate
+  const first = document.getElementById('firstName').value.trim();
+  const last = document.getElementById('lastName').value.trim();
+  const state = document.getElementById('state').value.trim();
+  const city = document.getElementById('city').value.trim();
+  const address = document.getElementById('address').value.trim();
+  const mobile = document.getElementById('mobile').value.trim();
+
+  if(!first || !last || !state || !city || !address || !mobile){
+    alert('Please fill all delivery fields before proceeding.');
+    return;
+  }
+
+  // prepare order object
+  const orderId = 'ORD' + Date.now();
+  const amount = cart.totalAfterCoupon || cart.total;
+  const order = {
+    id: orderId, amount, name: first + ' ' + last, state, city, address, mobile, items: cart.items.slice()
+  };
+
+  // save pending order in localStorage so we can show success when user returns
+  localStorage.setItem('pending_order', JSON.stringify(order));
+
+  // UPI deep-link
+  const name = encodeURIComponent('Wellversed Store');
+  const note = encodeURIComponent('Order ' + orderId);
+  // Use MERCHANT_UPI configured above
+  const upiLink = `upi://pay?pa=${encodeURIComponent(MERCHANT_UPI)}&pn=${name}&am=${amount}&tn=${note}&cu=INR&tr=${orderId}`;
+
+  // redirect to UPI app
+  window.location.href = upiLink;
+
+  // As fallback: also show small message if user doesn't return
+  setTimeout(()=> {
+    // if still pending after some seconds, show instruction to user (optional)
+    // (do nothing here to keep flow simple)
+  }, 3000);
+}
+
+/* ---------- on page load check pending_order to show success after return ---------- */
+window.addEventListener('load', ()=>{
+  // If user returned after UPI payment and pending_order exists, show success
+  const pending = localStorage.getItem('pending_order');
+  if(pending){
+    // show success box and clear cart & pending
+    setTimeout(()=> showSuccessAndClear(pending), 700);
+  }
+});
+
+/* ---------- show success & clear cart ---------- */
+function showSuccessAndClear(pendingJson){
+  try {
+    const order = JSON.parse(pendingJson);
+    // NOTE: This is a UI-only confirmation. For real production, verify payment server-side.
+    document.getElementById('successBox').style.display = 'block';
+    // clear pending & cart
+    localStorage.removeItem('pending_order');
+    cart = {items:[],count:0,total:0,oldTotal:0,coupon:null,pointsApplied:false};
+    appliedCheckoutCoupon = null;
+    recalcCart();
+    showCartbar();
+    // hide after 4s
+    setTimeout(()=>{ document.getElementById('successBox').style.display='none' },4000);
+  } catch(e){
+    console.error(e);
+  }
+}
+
+/* ---------- fakePay kept for compatibility (not used) ---------- */
+function fakePay(method){
+  // fallback demo - simply success
+  placeOrderSuccess(method);
+}
+
+function placeOrderSuccess(method){
+  // UI success
+  document.getElementById('checkoutModal').style.display='none';
+  document.getElementById('successBox').style.display='block';
+  setTimeout(()=>{ document.getElementById('successBox').style.display='none'; },3500);
+  // clear cart
+  cart = {items:[],count:0,total:0,oldTotal:0,coupon:null,pointsApplied:false};
+  appliedCheckoutCoupon = null;
+  recalcCart(); showCartbar();
+}
+
+/* init */
+recalcCart();
+showCartbar();
+
+</script>
+</body>
+</html>
