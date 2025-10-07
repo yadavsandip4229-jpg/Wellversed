@@ -1,101 +1,139 @@
 <!doctype html>
 <html lang="hi">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Wellversed-like Demo Store</title>
-<style>
-  /* Reset / Base (same design as before) */
-  :root{--accent:#22b8b0;--muted:#8b9aa3;--card:#ffffff;--bg:#f4f6f7;--danger:#e74c3c;--success:#2ecc71;}
-  *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,Roboto,'Noto Sans',sans-serif;background:var(--bg);color:#0b2540;-webkit-font-smoothing:antialiased}
-  a{color:inherit;text-decoration:none}
-  header{background:#fff;padding:12px 14px;border-bottom:1px solid #e6eef0;position:sticky;top:0;z-index:40}
-  .top{display:flex;align-items:center;gap:12px;max-width:1100px;margin:0 auto}
-  .brand{color:var(--accent);font-weight:700;font-size:20px}
-  .search{flex:1}
-  .search input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #e0eceb;font-size:14px}
-  .icon-btn{width:36px;height:36px;border-radius:8px;background:#f1fbfa;display:flex;align-items:center;justify-content:center}
-  main{max-width:1100px;margin:14px auto;padding:0 14px}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .card{background:var(--card);border-radius:12px;padding:10px;box-shadow:0 6px 20px rgba(10,30,40,0.04);position:relative;overflow:hidden}
-  .card img{width:100%;height:130px;object-fit:contain;border-radius:8px;background:#fafafa}
-  .rating{position:absolute;left:12px;top:12px;background:#18a999;color:#fff;padding:6px 8px;border-radius:8px;font-weight:700;font-size:13px}
-  .title{margin-top:10px;font-weight:600;font-size:15px;line-height:1.2}
-  .price{font-weight:800;font-size:16px}
-  #successBox{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:var(--success);color:#fff;padding:12px 18px;border-radius:10px;z-index:95;font-weight:700;}
-  .checkout-form input{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef0;margin-bottom:8px;}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wellversed - Full Demo Store</title>
+  <style>
+    :root{--accent:#22b8b0;--card:#fff;--muted:#777}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans',sans-serif;margin:0;background:#f6f8f9;color:#0b2540}
+    header{background:#fff;padding:18px 16px;border-bottom:1px solid #e6eef0;position:sticky;top:0;z-index:20}
+    .top{display:flex;align-items:center;gap:12px}
+    .brand{color:var(--accent);font-weight:700;font-size:28px}
+    .search{flex:1;margin-left:8px}
+    .search input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #e0eceb}
+    main{padding:18px}
+    .controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .filters{background:#fff;padding:10px;border-radius:8px;box-shadow:0 1px 0 rgba(0,0,0,0.03);}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .card{background:var(--card);border-radius:12px;padding:12px;box-shadow:0 6px 20px rgba(10,30,40,0.04);position:relative}
+    .card img{width:100%;height:120px;object-fit:contain;border-radius:8px;background:#fafafa}
+    .rating{position:absolute;left:12px;top:12px;background:#18a999;color:#fff;padding:6px 8px;border-radius:8px;font-weight:700}
+    .veg{position:absolute;right:12px;top:12px;border-radius:4px;padding:4px;background:#fff;border:1px solid #e6f2f0}
+    .title{margin-top:10px;font-weight:600}
+    .price{margin-top:6px;font-weight:700}
+    .old{color:var(--muted);text-decoration:line-through;font-weight:500;margin-left:8px;font-size:14px}
+    .off{color:#0aa64a;font-weight:700;margin-top:4px}
+    .add{display:inline-block;margin-top:10px;padding:10px 12px;border-radius:10px;border:2px solid var(--accent);background:#fff;cursor:pointer}
+    .add.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .cartbar{position:fixed;left:0;right:0;bottom:0;background:var(--accent);padding:12px 16px;color:#fff;display:flex;align-items:center;justify-content:space-between;border-top-left-radius:8px;border-top-right-radius:8px}
+    .small{font-size:14px}
+    .checkout-form{background:#fff;border-radius:12px;padding:16px;margin-top:20px;display:none;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
+    .checkout-form input{width:100%;padding:10px;margin-top:10px;border:1px solid #ccc;border-radius:8px}
+    .pay-btn{background:var(--accent);color:#fff;padding:12px;border:none;border-radius:10px;font-weight:700;width:100%;margin-top:12px}
+    .success{display:none;margin-top:12px;padding:10px;border-radius:8px;background:#e6f9ed;color:#128c3d;font-weight:600;text-align:center}
+    @media(min-width:900px){.grid{grid-template-columns:repeat(4,1fr)}}
+  </style>
 </head>
 <body>
+  <header>
+    <div class="top">
+      <div class="brand">wellversed<span style="font-weight:400;color:#4a6570">™</span></div>
+      <div class="search"><input id="q" placeholder="Shop for Health Supplements" /></div>
+      <div style="width:36px;height:36px;border-radius:8px;background:#f1fbfa;display:flex;align-items:center;justify-content:center">♡</div>
+    </div>
+  </header>
 
-<header>
-  <div class="top">
-    <div class="brand">wellversed<span style="font-weight:400;color:#4a6570">™</span></div>
-    <div class="search"><input id="searchInput" placeholder="Search..." /></div>
-    <div class="icon-btn">♡</div>
+  <main>
+    <div class="controls">
+      <div class="filters">Filters</div>
+      <div class="sort">Sort by: <button onclick="sortBy()">⇅</button></div>
+    </div>
+
+    <section class="grid" id="products"></section>
+
+    <!-- Checkout form -->
+    <div class="checkout-form" id="checkoutForm">
+      <h3>Checkout Form 🛒</h3>
+      <input id="fname" placeholder="First Name & Last Name" required />
+      <input id="state" placeholder="State" required />
+      <input id="city" placeholder="City" required />
+      <input id="address" placeholder="Address" required />
+      <input id="pincode" placeholder="Pincode" required />
+      <input id="mobile" placeholder="Mobile Number" required />
+      <input id="coupon" placeholder="SAVE50 Coupon Code" />
+      <button type="button" onclick="applyCoupon()">Apply Coupon</button>
+      <button type="button" class="pay-btn" onclick="payNow()">💳 Pay Now (UPI)</button>
+      <div class="success" id="successMsg">✅ Payment Successful! Your order has been placed.</div>
+    </div>
+  </main>
+
+  <div class="cartbar" id="cartbar" style="display:none">
+    <div>🛒 <span id="cart-count">0</span> items • ₹<span id="cart-total">0</span></div>
+    <div><button onclick="showCheckout()" style="padding:8px 12px;border-radius:8px;border:none;background:#fff;color:var(--accent);font-weight:700">CHECKOUT</button></div>
   </div>
-</header>
 
-<main>
-  <section class="grid" id="productGrid">
-    <div class="card">
-      <img src="https://via.placeholder.com/300x180?text=Demo+Product" alt="Demo Product">
-      <div class="rating">4.9 ★</div>
-      <div class="title">Demo Product Name</div>
-      <div class="price">₹569</div>
-      <button onclick="openCheckout()" style="width:100%;padding:10px;margin-top:10px;border:none;background:var(--accent);color:#fff;border-radius:10px;font-weight:700">Buy Now</button>
-    </div>
-  </section>
-</main>
+  <script>
+    const PRODUCTS = [
+      {id:1,title:'Wellcore - Micronised Creatine',price:569,old:749,rate:4.9,img:'https://via.placeholder.com/300x180?text=Creatine'},
+      {id:2,title:'Wellcore - Pure Micronised',price:569,old:749,rate:4.9,img:'https://via.placeholder.com/300x180?text=Pure+Creatine'},
+      {id:3,title:'Whey Protein - 1kg',price:1299,old:1499,rate:4.7,img:'https://via.placeholder.com/300x180?text=Whey'},
+      {id:4,title:'Pre-Workout - 300g',price:899,old:1099,rate:4.6,img:'https://via.placeholder.com/300x180?text=Pre-Workout'}
+    ];
 
-<!-- Checkout Modal -->
-<div id="checkoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:80;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:12px;max-width:700px;width:96%;padding:14px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div style="font-weight:800;font-size:18px">Checkout</div>
-      <button onclick="closeCheckout()" style="background:transparent;border:none;font-size:20px;cursor:pointer">✕</button>
-    </div>
+    const cart = {count:0,total:0,items:[]};
 
-    <div class="checkout-form">
-      <input id="firstName" placeholder="First name" />
-      <input id="lastName" placeholder="Last name" />
-      <input id="state" placeholder="State" />
-      <input id="city" placeholder="City" />
-      <input id="pincode" placeholder="Pincode" />
-      <input id="address" placeholder="Address (House, Street, Locality)" />
-      <input id="mobile" placeholder="Mobile number" />
-    </div>
+    function renderProducts(list){
+      const container = document.getElementById('products');
+      container.innerHTML='';
+      list.forEach(p=>{
+        const c=document.createElement('div');c.className='card';
+        c.innerHTML = `
+          <div class="rating">${p.rate} ★</div>
+          <div class="veg">●</div>
+          <img src="${p.img}" alt="${p.title}" />
+          <div class="title">${p.title}</div>
+          <div class="price">₹${p.price} <span class="old">₹${p.old}</span></div>
+          <div class="off">${Math.round((1 - p.price/p.old)*100)}% off</div>
+          <button class="add" onclick="addToCart(${p.id})">Add to cart</button>
+        `;
+        container.appendChild(c);
+      })
+    }
 
-    <div style="text-align:center">
-      <button onclick="startPayment()" style="width:100%;padding:12px;border:none;background:var(--accent);color:#fff;border-radius:10px;font-weight:800">Pay ₹569 (UPI)</button>
-    </div>
-  </div>
-</div>
+    function addToCart(id){
+      const p = PRODUCTS.find(x=>x.id===id);
+      cart.count += 1; cart.total += p.price; cart.items.push(p);
+      document.getElementById('cart-count').textContent = cart.count;
+      document.getElementById('cart-total').textContent = cart.total;
+      document.getElementById('cartbar').style.display = 'flex';
+    }
 
-<!-- Success Message -->
-<div id="successBox">✅ Payment successful — आपका ऑर्डर confirm हो गया है।</div>
+    function showCheckout(){
+      document.getElementById('checkoutForm').style.display='block';
+      window.scrollTo(0, document.body.scrollHeight);
+    }
 
-<script>
-function openCheckout(){document.getElementById('checkoutModal').style.display='flex';}
-function closeCheckout(){document.getElementById('checkoutModal').style.display='none';}
+    function applyCoupon(){
+      const code = document.getElementById('coupon').value.trim().toUpperCase();
+      if(code==='SAVE50'){
+        alert('🎉 Coupon Applied: ₹50 off!');
+        cart.total -= 50;
+        document.getElementById('cart-total').textContent = cart.total;
+      }else if(code!==''){
+        alert('❌ Invalid Coupon Code');
+      }
+    }
 
-// Real UPI Deep Link — अपने merchant UPI डालें
-const MERCHANT_UPI = "merchant@upi";
+    function payNow(){
+      const upi = "merchant@upi"; // Replace with your real UPI ID
+      const amount = cart.total || 1;
+      const upiLink = `upi://pay?pa=${upi}&pn=Wellversed%20Store&am=${amount}&cu=INR`;
+      window.location.href = upiLink;
+      setTimeout(()=>{document.getElementById('successMsg').style.display='block';},3000);
+    }
 
-function startPayment(){
-  const amount = 569;
-  const name = document.getElementById('firstName').value || "Customer";
-  const upiLink = `upi://pay?pa=${MERCHANT_UPI}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR`;
-  window.location.href = upiLink;
-
-  // Payment success demo
-  document.getElementById('checkoutModal').style.display='none';
-  const box = document.getElementById('successBox');
-  box.style.display='block';
-  setTimeout(()=>box.style.display='none',5000);
-}
-</script>
-
+    renderProducts(PRODUCTS);
+  </script>
 </body>
 </html>
