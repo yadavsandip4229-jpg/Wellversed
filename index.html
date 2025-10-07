@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Wellversed - Full Demo Store</title>
+  <title>Wellversed - Demo (Replica-style)</title>
   <style>
     :root{--accent:#22b8b0;--card:#fff;--muted:#777}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans',sans-serif;margin:0;background:#f6f8f9;color:#0b2540}
@@ -28,10 +28,10 @@
     .add.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
     .cartbar{position:fixed;left:0;right:0;bottom:0;background:var(--accent);padding:12px 16px;color:#fff;display:flex;align-items:center;justify-content:space-between;border-top-left-radius:8px;border-top-right-radius:8px}
     .small{font-size:14px}
-    .checkout-form{background:#fff;border-radius:12px;padding:16px;margin-top:20px;display:none;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
-    .checkout-form input{width:100%;padding:10px;margin-top:10px;border:1px solid #ccc;border-radius:8px}
-    .pay-btn{background:var(--accent);color:#fff;padding:12px;border:none;border-radius:10px;font-weight:700;width:100%;margin-top:12px}
-    .success{display:none;margin-top:12px;padding:10px;border-radius:8px;background:#e6f9ed;color:#128c3d;font-weight:600;text-align:center}
+    #checkout{display:none;background:#fff;padding:18px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);}
+    #success{display:none;background:#e0ffef;color:#037a3d;padding:14px;margin-top:14px;border-radius:10px;font-weight:600;text-align:center;}
+    input,select{width:100%;padding:10px;margin-top:6px;margin-bottom:10px;border:1px solid #ccc;border-radius:8px}
+    button.pay{width:100%;padding:12px;border:none;background:var(--accent);color:#fff;font-weight:700;border-radius:10px;cursor:pointer}
     @media(min-width:900px){.grid{grid-template-columns:repeat(4,1fr)}}
   </style>
 </head>
@@ -52,87 +52,73 @@
 
     <section class="grid" id="products"></section>
 
-    <!-- Checkout form -->
-    <div class="checkout-form" id="checkoutForm">
-      <h3>Checkout Form 🛒</h3>
-      <input id="fname" placeholder="First Name & Last Name" required />
-      <input id="state" placeholder="State" required />
-      <input id="city" placeholder="City" required />
-      <input id="address" placeholder="Address" required />
-      <input id="pincode" placeholder="Pincode" required />
-      <input id="mobile" placeholder="Mobile Number" required />
-      <input id="coupon" placeholder="SAVE50 Coupon Code" />
-      <button type="button" onclick="applyCoupon()">Apply Coupon</button>
-      <button type="button" class="pay-btn" onclick="payNow()">💳 Pay Now (UPI)</button>
-      <div class="success" id="successMsg">✅ Payment Successful! Your order has been placed.</div>
+    <div id="checkout">
+      <h3>Checkout Form</h3>
+      <input placeholder="First Name & Last Name" id="name">
+      <input placeholder="State" id="state">
+      <input placeholder="City" id="city">
+      <input placeholder="Address" id="address">
+      <input placeholder="Pincode" id="pincode">
+      <input placeholder="Mobile Number" id="mobile">
+      <input placeholder="Coupon Code (e.g. SAVE50)" id="coupon">
+      <button class="pay" onclick="payNow()">Pay via UPI</button>
+      <div id="success">✅ Payment Successful! Your order has been placed.</div>
     </div>
   </main>
 
   <div class="cartbar" id="cartbar" style="display:none">
     <div>🛒 <span id="cart-count">0</span> items • ₹<span id="cart-total">0</span></div>
-    <div><button onclick="showCheckout()" style="padding:8px 12px;border-radius:8px;border:none;background:#fff;color:var(--accent);font-weight:700">CHECKOUT</button></div>
+    <div><button style="padding:8px 12px;border-radius:8px;border:none;background:#fff;color:var(--accent);font-weight:700" onclick="showCheckout()">VIEW CART</button></div>
   </div>
 
   <script>
+    const MERCHANT_UPI = "sandeepyadav@paytm"; // अपना UPI ID डालो
     const PRODUCTS = [
       {id:1,title:'Wellcore - Micronised Creatine',price:569,old:749,rate:4.9,img:'https://via.placeholder.com/300x180?text=Creatine'},
       {id:2,title:'Wellcore - Pure Micronised',price:569,old:749,rate:4.9,img:'https://via.placeholder.com/300x180?text=Pure+Creatine'},
       {id:3,title:'Whey Protein - 1kg',price:1299,old:1499,rate:4.7,img:'https://via.placeholder.com/300x180?text=Whey'},
       {id:4,title:'Pre-Workout - 300g',price:899,old:1099,rate:4.6,img:'https://via.placeholder.com/300x180?text=Pre-Workout'}
     ];
-
-    const cart = {count:0,total:0,items:[]};
+    const cart={count:0,total:0,items:[]};
 
     function renderProducts(list){
-      const container = document.getElementById('products');
-      container.innerHTML='';
+      const container=document.getElementById('products');container.innerHTML='';
       list.forEach(p=>{
         const c=document.createElement('div');c.className='card';
-        c.innerHTML = `
-          <div class="rating">${p.rate} ★</div>
+        c.innerHTML=`<div class="rating">${p.rate} ★</div>
           <div class="veg">●</div>
           <img src="${p.img}" alt="${p.title}" />
           <div class="title">${p.title}</div>
           <div class="price">₹${p.price} <span class="old">₹${p.old}</span></div>
           <div class="off">${Math.round((1 - p.price/p.old)*100)}% off</div>
-          <button class="add" onclick="addToCart(${p.id})">Add to cart</button>
-        `;
+          <button class="add" onclick="addToCart(${p.id})">Add to cart</button>`;
         container.appendChild(c);
       })
     }
 
     function addToCart(id){
-      const p = PRODUCTS.find(x=>x.id===id);
-      cart.count += 1; cart.total += p.price; cart.items.push(p);
-      document.getElementById('cart-count').textContent = cart.count;
-      document.getElementById('cart-total').textContent = cart.total;
-      document.getElementById('cartbar').style.display = 'flex';
+      const p=PRODUCTS.find(x=>x.id===id);
+      cart.count++;cart.total+=p.price;cart.items.push(p);
+      document.getElementById('cart-count').textContent=cart.count;
+      document.getElementById('cart-total').textContent=cart.total;
+      document.getElementById('cartbar').style.display='flex';
     }
 
     function showCheckout(){
-      document.getElementById('checkoutForm').style.display='block';
-      window.scrollTo(0, document.body.scrollHeight);
-    }
-
-    function applyCoupon(){
-      const code = document.getElementById('coupon').value.trim().toUpperCase();
-      if(code==='SAVE50'){
-        alert('🎉 Coupon Applied: ₹50 off!');
-        cart.total -= 50;
-        document.getElementById('cart-total').textContent = cart.total;
-      }else if(code!==''){
-        alert('❌ Invalid Coupon Code');
-      }
+      document.getElementById('checkout').style.display='block';
+      window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
     }
 
     function payNow(){
-      const upi = "merchant@upi"; // Replace with your real UPI ID
-      const amount = cart.total || 1;
-      const upiLink = `upi://pay?pa=${upi}&pn=Wellversed%20Store&am=${amount}&cu=INR`;
-      window.location.href = upiLink;
-      setTimeout(()=>{document.getElementById('successMsg').style.display='block';},3000);
+      let total=cart.total;
+      const code=document.getElementById('coupon').value.trim();
+      if(code.toUpperCase()==='SAVE50'){total=Math.max(0,total-50);}
+      const upi=`upi://pay?pa=${MERCHANT_UPI}&pn=Wellversed&am=${total}&cu=INR&tn=Order+Payment`;
+      window.location.href=upi;
+      setTimeout(()=>document.getElementById('success').style.display='block',3000);
     }
 
+    function sortBy(){alert('Sorting demo')}
     renderProducts(PRODUCTS);
   </script>
 </body>
