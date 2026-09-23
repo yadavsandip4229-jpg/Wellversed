@@ -1,147 +1,1587 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Premium Online Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NexusPPT - Professional 3D Presentation Store & Admin</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            900: '#030712',
+                            800: '#0f172a',
+                            700: '#1e293b',
+                            600: '#334155'
+                        },
+                        neon: {
+                            cyan: '#06b6d4',
+                            indigo: '#6366f1',
+                            violet: '#8b5cf6',
+                            pink: '#ec4899'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Three.js for 3D effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f0f2f5; color: #333; padding-bottom: 50px; }
-        
-        /* Header Design */
-        header { background: linear-gradient(135deg, #111827, #1f2937); color: white; text-align: center; padding: 30px 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
-        header h1 { font-size: 28px; margin-bottom: 5px; }
-        header p { font-size: 14px; opacity: 0.8; }
-
-        .container { max-width: 1000px; margin: 30px auto; padding: 0 15px; }
-
-        /* Section Titles */
-        .section-title { font-size: 22px; margin-bottom: 20px; border-left: 5px solid #25D366; padding-left: 10px; font-weight: bold; }
-
-        /* Products Grid (Mobile aur PC responsive) */
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
-        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.2s; text-align: center; padding: 15px; }
-        .product-card:hover { transform: translateY(-5px); }
-        .product-img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; background-color: #eee; }
-        .product-title { font-size: 18px; margin: 12px 0 5px 0; color: #111; }
-        .product-price { color: #25D366; font-size: 20px; font-weight: bold; margin-bottom: 12px; }
-
-        /* Checkout Form Section */
-        .checkout-box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }
-        .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 5px; color: #444; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; outline: none; }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #25D366; }
-
-        /* Payment Section */
-        .payment-box { background: #f9fafb; border: 2px dashed #25D366; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 20px; }
-        .payment-box p { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #333; }
-        .qr-code { width: 150px; height: 150px; border-radius: 8px; }
-
-        /* Submit Button */
-        .order-btn { width: 100%; background-color: #25D366; color: white; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
-        .order-btn:hover { background-color: #1ebd59; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.3);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 2px;
+        }
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
     </style>
 </head>
-<body>
+<body class="bg-dark-900 text-slate-100 min-h-screen flex flex-col custom-scrollbar overflow-x-hidden">
 
-    <header>
-        <h1>🛍️ Mera Online Store</h1>
-        <p>Aapka aasan aur surakshit shopping store</p>
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Top Navigation -->
+    <header class="sticky top-0 z-50 glass border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+            <!-- Logo & Title -->
+            <div class="flex items-center space-x-2.5 cursor-pointer" onclick="switchView('customer')">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-violet-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i data-lucide="presentation" class="w-5 h-5 sm:w-6 sm:h-6 text-white"></i>
+                </div>
+                <div>
+                    <span class="text-lg sm:text-xl font-extrabold bg-gradient-to-r from-cyan-400 via-indigo-400 to-violet-400 bg-clip-text text-transparent">NexusPPT</span>
+                    <span class="text-[10px] sm:text-xs block text-slate-400 tracking-wider">3D STORE</span>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium">
+                <button onclick="switchView('customer'); filterCategory('All')" class="text-slate-300 hover:text-cyan-400 transition">Explore</button>
+                <button onclick="switchView('customer'); filterCategory('Business')" class="text-slate-300 hover:text-cyan-400 transition">Business</button>
+                <button onclick="switchView('customer'); filterCategory('Technology')" class="text-slate-300 hover:text-cyan-400 transition">Technology</button>
+                <button onclick="switchView('customer'); filterCategory('Education')" class="text-slate-300 hover:text-cyan-400 transition">Education</button>
+                <button onclick="openPurchasesModal()" class="text-slate-300 hover:text-cyan-400 transition flex items-center gap-1.5">
+                    <i data-lucide="download-cloud" class="w-4 h-4"></i> My Purchases
+                </button>
+            </nav>
+
+            <!-- Actions & Mode Switcher -->
+            <div class="flex items-center space-x-2.5 sm:space-x-4">
+                <!-- Secure Admin Switcher Button -->
+                <button id="role-switch-btn" onclick="promptAdminLogin()" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-semibold bg-slate-800 border border-slate-700 hover:border-indigo-500 flex items-center gap-1.5 sm:gap-2 transition shadow-inner">
+                    <i data-lucide="shield" class="w-3.5 h-3.5 text-indigo-400"></i>
+                    <span id="role-text" class="hidden sm:inline">Admin Login (Owner Only)</span>
+                    <span class="sm:hidden">Admin</span>
+                </button>
+
+                <!-- Cart Toggle Button -->
+                <button onclick="toggleCartDrawer(true)" class="relative p-2 sm:p-2.5 rounded-xl glass-card hover:bg-slate-800 transition">
+                    <i data-lucide="shopping-bag" class="w-4 h-4 sm:w-5 sm:h-5 text-slate-200"></i>
+                    <span id="cart-badge" class="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-indigo-600 text-[9px] sm:text-[10px] font-bold flex items-center justify-center text-white shadow-md shadow-indigo-600/50">0</span>
+                </button>
+            </div>
+        </div>
     </header>
 
-    <div class="container">
+    <!-- MAIN CUSTOMER VIEW -->
+    <main id="customer-view" class="flex-1 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 w-full">
         
-        <!-- Products List -->
-        <div class="section-title">Hamare Products</div>
-        <div class="products-grid">
-            <div class="product-card">
-                <img src="https://via.placeholder.com/250x180" alt="Product 1" class="product-img">
-                <div class="product-title">Smart Watch</div>
-                <div class="product-price">₹1,299</div>
+        <!-- AUTO SLIDER BANNER SECTION -->
+        <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl glass-card mb-6 sm:mb-12 border border-slate-700/50 shadow-2xl">
+            <div class="absolute -right-20 -bottom-20 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-20 -top-20 w-72 sm:w-96 h-72 sm:h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <!-- Slider Container -->
+            <div id="hero-slider-container" class="relative min-h-[340px] sm:min-h-[420px] md:min-h-[460px] flex items-center">
+                <!-- Slides will be dynamically injected here -->
             </div>
-            <div class="product-card">
-                <img src="https://via.placeholder.com/250x180" alt="Product 2" class="product-img">
-                <div class="product-title">Wireless Earbuds</div>
-                <div class="product-price">₹899</div>
-            </div>
-            <div class="product-card">
-                <img src="https://via.placeholder.com/250x180" alt="Product 3" class="product-img">
-                <div class="product-title">Bluetooth Speaker</div>
-                <div class="product-price">₹1,499</div>
+
+            <!-- Slider Controls / Dots -->
+            <div class="absolute bottom-4 sm:bottom-6 left-4 sm:left-8 right-4 sm:right-8 flex items-center justify-between z-20">
+                <div id="slider-dots" class="flex items-center space-x-1.5 sm:space-x-2">
+                    <!-- Dots generated via JS -->
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="prevSlide()" class="p-2 sm:p-2.5 rounded-xl glass hover:bg-slate-800 text-slate-300 transition border border-slate-700">
+                        <i data-lucide="chevron-left" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                    </button>
+                    <button onclick="nextSlide()" class="p-2 sm:p-2.5 rounded-xl glass hover:bg-slate-800 text-slate-300 transition border border-slate-700">
+                        <i data-lucide="chevron-right" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Order Form -->
-        <div class="section-title">Order Karein</div>
-        <div class="checkout-box">
-            <form id="orderForm">
-                <div class="form-group">
-                    <label>Aapka Naam (Full Name):</label>
-                    <input type="text" id="name" placeholder="Pura naam dalein" required>
-                </div>
+        <!-- Catalog Filter & Search Section -->
+        <div id="ppt-catalog" class="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar w-full" id="category-filters">
+                <button onclick="filterCategory('All')" class="category-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium bg-indigo-600 text-white shadow-md transition whitespace-nowrap">All Decks</button>
+                <button onclick="filterCategory('Business')" class="category-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium glass hover:bg-slate-800 text-slate-300 transition whitespace-nowrap">Business</button>
+                <button onclick="filterCategory('Technology')" class="category-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium glass hover:bg-slate-800 text-slate-300 transition whitespace-nowrap">Technology</button>
+                <button onclick="filterCategory('Education')" class="category-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium glass hover:bg-slate-800 text-slate-300 transition whitespace-nowrap">Education</button>
+                <button onclick="filterCategory('Medical')" class="category-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium glass hover:bg-slate-800 text-slate-300 transition whitespace-nowrap">Medical</button>
+                <button onclick="filterCategory('Creative')" class="category-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium glass hover:bg-slate-800 text-slate-300 transition whitespace-nowrap">Creative</button>
+                <button onclick="filterCategory('Marketing')" class="category-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium glass hover:bg-slate-800 text-slate-300 transition whitespace-nowrap">Marketing</button>
+            </div>
+            <div class="relative w-full md:w-72">
+                <i data-lucide="search" class="absolute left-3.5 top-3 w-4 h-4 text-slate-400"></i>
+                <input type="text" id="search-input" oninput="handleSearch()" placeholder="Search presentations..." class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+            </div>
+        </div>
 
-                <div class="form-group">
-                    <label>Mobile Number:</label>
-                    <input type="tel" id="phone" placeholder="10-digit mobile number" required>
-                </div>
+        <!-- PPT Grid -->
+        <div id="ppt-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <!-- Dynamic Cards Populated via JS -->
+        </div>
+    </main>
 
-                <div class="form-group">
-                    <label>Product Select Karein:</label>
-                    <select id="product">
-                        <option value="Smart Watch - ₹1299">Smart Watch - ₹1,299</option>
-                        <option value="Wireless Earbuds - ₹899">Wireless Earbuds - ₹899</option>
-                        <option value="Bluetooth Speaker - ₹1499">Bluetooth Speaker - ₹1,499</option>
-                    </select>
-                </div>
+    <!-- ADMIN PANEL VIEW (Secured Owner Only) -->
+    <main id="admin-view" class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full hidden">
+        <!-- Admin Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-800">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+                    <i data-lucide="layout-dashboard" class="w-7 h-7 sm:w-8 sm:h-8 text-indigo-400"></i> Admin Control Center
+                </h1>
+                <p class="text-slate-400 text-xs sm:text-sm">Manage inventory, monitor slider banners, sales, and track customer engagement securely.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="logoutAdmin()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-900/40 text-rose-400 border border-slate-700 font-semibold text-xs sm:text-sm transition flex items-center gap-2">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Lock Admin
+                </button>
+                <button onclick="openAddPPTModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 font-semibold text-xs sm:text-sm shadow-lg shadow-indigo-600/30 hover:opacity-90 transition flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Add New PPT Deck
+                </button>
+            </div>
+        </div>
 
-                <div class="form-group">
-                    <label>Ghar Ka Pata (Full Address):</label>
-                    <textarea id="address" rows="3" placeholder="Ghar ka number, gali, landmark aur pincode" required></textarea>
+        <!-- Dashboard Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            <div class="glass-card p-5 sm:p-6 rounded-2xl border border-slate-700/50">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Sales</span>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                        <i data-lucide="trending-up" class="w-5 h-5"></i>
+                    </div>
                 </div>
-
-                <!-- UPI Payment Section -->
-                <div class="payment-box">
-                    <p>💳 UPI se Payment karne ke liye QR Code scan karein:</p>
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=YOURUPI@upi" alt="QR Code" class="qr-code">
-                    <p style="font-size: 12px; color: #666; margin-top: 5px;">Scan karne ke baad neeche Order Button par click karein</p>
+                <div class="text-2xl sm:text-3xl font-extrabold text-white mb-1" id="stat-sales">1,248</div>
+                <span class="text-xs text-emerald-400 font-medium flex items-center gap-1">+18.2% this month</span>
+            </div>
+            <div class="glass-card p-5 sm:p-6 rounded-2xl border border-slate-700/50">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Revenue</span>
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                        <span class="text-lg font-bold">₹</span>
+                    </div>
                 </div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-white mb-1" id="stat-revenue">₹24,850</div>
+                <span class="text-xs text-indigo-400 font-medium flex items-center gap-1">+24.5% vs last month</span>
+            </div>
+            <div class="glass-card p-5 sm:p-6 rounded-2xl border border-slate-700/50">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Customers</span>
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                    </div>
+                </div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-white mb-1" id="stat-customers">3,892</div>
+                <span class="text-xs text-cyan-400 font-medium flex items-center gap-1">+129 new today</span>
+            </div>
+            <div class="glass-card p-5 sm:p-6 rounded-2xl border border-slate-700/50">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active PPT Decks</span>
+                    <div class="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-400">
+                        <i data-lucide="file-text" class="w-5 h-5"></i>
+                    </div>
+                </div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-white mb-1" id="stat-ppts">18</div>
+                <span class="text-xs text-violet-400 font-medium flex items-center gap-1">Fully Optimized</span>
+            </div>
+        </div>
 
-                <button type="button" class="order-btn" onclick="sendOrder()">
-                    📲 WhatsApp Par Order Bhejein
+        <!-- Admin Tabs -->
+        <div class="flex space-x-2 border-b border-slate-800 mb-6 overflow-x-auto pb-2">
+            <button onclick="switchAdminTab('products')" id="admin-tab-products" class="admin-tab px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 text-white transition whitespace-nowrap">PPT Inventory</button>
+            <button onclick="switchAdminTab('sliders')" id="admin-tab-sliders" class="admin-tab px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-400 hover:bg-slate-800 transition whitespace-nowrap">Hero Slider Manager</button>
+            <button onclick="switchAdminTab('orders')" id="admin-tab-orders" class="admin-tab px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-400 hover:bg-slate-800 transition whitespace-nowrap">Orders & Tracking</button>
+            <button onclick="switchAdminTab('customers')" id="admin-tab-customers" class="admin-tab px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-400 hover:bg-slate-800 transition whitespace-nowrap">Customer List</button>
+            <button onclick="switchAdminTab('coupons')" id="admin-tab-coupons" class="admin-tab px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-400 hover:bg-slate-800 transition whitespace-nowrap">Coupons & Discounts</button>
+        </div>
+
+        <!-- Admin Tab Contents -->
+        <div id="admin-content-products" class="admin-section">
+            <div class="glass-card rounded-2xl overflow-hidden border border-slate-700/50">
+                <div class="p-4 sm:p-6 border-b border-slate-800 flex justify-between items-center">
+                    <h3 class="font-bold text-base sm:text-lg text-white">Presentation Inventory</h3>
+                    <span class="text-xs text-slate-400" id="admin-product-count">Showing all decks</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-800 bg-slate-900/50 text-slate-400 font-semibold text-[10px] sm:text-xs uppercase tracking-wider">
+                                <th class="p-3 sm:p-4">PPT Title</th>
+                                <th class="p-3 sm:p-4">Category</th>
+                                <th class="p-3 sm:p-4">Price</th>
+                                <th class="p-3 sm:p-4">Sales</th>
+                                <th class="p-3 sm:p-4">Rating</th>
+                                <th class="p-3 sm:p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-product-table-body" class="divide-y divide-slate-800/60">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Slider Manager Tab -->
+        <div id="admin-content-sliders" class="admin-section hidden">
+            <div class="glass-card rounded-2xl p-4 sm:p-6 border border-slate-700/50 mb-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="font-bold text-base sm:text-lg text-white">Manage Hero Banners / Slider</h3>
+                        <p class="text-xs text-slate-400">Add or remove slides that rotate automatically on homepage.</p>
+                    </div>
+                    <button onclick="openAddSliderModal()" class="px-3.5 sm:px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold text-xs shadow-md hover:bg-indigo-500 transition flex items-center gap-1.5">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Add Slide
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-800 bg-slate-900/50 text-slate-400 font-semibold text-[10px] sm:text-xs uppercase tracking-wider">
+                                <th class="p-3 sm:p-4">Slide Image</th>
+                                <th class="p-3 sm:p-4">Badge Text</th>
+                                <th class="p-3 sm:p-4">Heading Title</th>
+                                <th class="p-3 sm:p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-slider-table-body" class="divide-y divide-slate-800/60">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-content-orders" class="admin-section hidden">
+            <div class="glass-card rounded-2xl overflow-hidden border border-slate-700/50">
+                <div class="p-4 sm:p-6 border-b border-slate-800 flex justify-between items-center">
+                    <h3 class="font-bold text-base sm:text-lg text-white">Recent Customer Orders</h3>
+                    <span class="text-xs text-slate-400">Live transaction history</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-800 bg-slate-900/50 text-slate-400 font-semibold text-[10px] sm:text-xs uppercase tracking-wider">
+                                <th class="p-3 sm:p-4">Order ID</th>
+                                <th class="p-3 sm:p-4">Customer</th>
+                                <th class="p-3 sm:p-4">Items</th>
+                                <th class="p-3 sm:p-4">Total Amount</th>
+                                <th class="p-3 sm:p-4">Status</th>
+                                <th class="p-3 sm:p-4">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-orders-table-body" class="divide-y divide-slate-800/60">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-content-customers" class="admin-section hidden">
+            <div class="glass-card rounded-2xl overflow-hidden border border-slate-700/50">
+                <div class="p-4 sm:p-6 border-b border-slate-800 flex justify-between items-center">
+                    <h3 class="font-bold text-base sm:text-lg text-white">Registered Customers</h3>
+                    <span class="text-xs text-slate-400">Active user database</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-800 bg-slate-900/50 text-slate-400 font-semibold text-[10px] sm:text-xs uppercase tracking-wider">
+                                <th class="p-3 sm:p-4">Customer Name</th>
+                                <th class="p-3 sm:p-4">Email</th>
+                                <th class="p-3 sm:p-4">Purchased Decks</th>
+                                <th class="p-3 sm:p-4">Total Spent</th>
+                                <th class="p-3 sm:p-4">Joined Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-customers-table-body" class="divide-y divide-slate-800/60">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-content-coupons" class="admin-section hidden">
+            <div class="glass-card rounded-2xl p-4 sm:p-6 border border-slate-700/50 mb-6">
+                <h3 class="font-bold text-base sm:text-lg text-white mb-4">Active Discount Coupons</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-cyan-400 text-sm">NEXUS20</span>
+                            <p class="text-xs text-slate-400 mt-1">20% OFF on all decks</p>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
+                    </div>
+                    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-violet-400 text-sm">PRO50</span>
+                            <p class="text-xs text-slate-400 mt-1">₹400 OFF on orders > ₹1,500</p>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
+                    </div>
+                    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-indigo-400 text-sm">WELCOME10</span>
+                            <p class="text-xs text-slate-400 mt-1">10% OFF first order</p>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ADMIN LOGIN PIN MODAL -->
+    <div id="admin-pin-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+        <div class="glass-card rounded-3xl max-w-sm w-full p-6 sm:p-8 border border-slate-700/80 shadow-2xl relative text-center">
+            <button onclick="closeAdminPinModal()" class="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-800 text-slate-300 transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-4 border border-indigo-500/30">
+                <i data-lucide="shield-alert" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg sm:text-xl font-bold text-white mb-2">Owner Verification</h3>
+            <p class="text-xs text-slate-400 mb-6">Enter your secret admin passcode to access control panel.</p>
+            <form onsubmit="verifyAdminPin(event)" class="space-y-4">
+                <input type="password" id="admin-secret-pin" required placeholder="Enter passcode..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-center text-sm text-slate-200 focus:outline-none focus:border-indigo-500 tracking-widest font-mono">
+                <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 hover:opacity-90 transition">
+                    Access Dashboard
                 </button>
             </form>
         </div>
+    </div>
 
+    <!-- PPT DETAILS MODAL -->
+    <div id="ppt-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md hidden">
+        <div class="glass-card rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-slate-700/80 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+            <button onclick="closePPTModal()" class="absolute top-4 right-4 z-10 p-2.5 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div id="modal-content" class="p-4 sm:p-8">
+                <!-- Dynamic Content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- CART SLIDE-OVER DRAWER -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 overflow-hidden hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="toggleCartDrawer(false)"></div>
+        <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
+            <div class="w-screen max-w-md glass border-l border-slate-800 flex flex-col shadow-2xl">
+                <!-- Cart Header -->
+                <div class="p-4 sm:p-6 border-b border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="shopping-bag" class="w-5 h-5 text-indigo-400"></i>
+                        <h2 class="font-bold text-base sm:text-lg text-white">Your Cart (<span id="cart-item-count">0</span>)</h2>
+                    </div>
+                    <button onclick="toggleCartDrawer(false)" class="p-2 rounded-lg hover:bg-slate-800 text-slate-400 transition">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <!-- Cart Items List -->
+                <div id="cart-items-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 divide-y divide-slate-800/50">
+                    <!-- Dynamic Cart Items -->
+                </div>
+                <!-- Cart Footer & Checkout -->
+                <div class="p-4 sm:p-6 border-t border-slate-800 bg-slate-900/80">
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between text-xs sm:text-sm text-slate-400">
+                            <span>Subtotal</span>
+                            <span id="cart-subtotal">₹0.00</span>
+                        </div>
+                        <div class="flex justify-between text-xs sm:text-sm text-slate-400">
+                            <span>Discount</span>
+                            <span id="cart-discount" class="text-emerald-400">-₹0.00</span>
+                        </div>
+                        <div class="flex justify-between text-sm sm:text-base font-bold text-white pt-2 border-t border-slate-800">
+                            <span>Total</span>
+                            <span id="cart-total" class="text-cyan-400">₹0.00</span>
+                        </div>
+                    </div>
+                    <button onclick="openCheckoutModal()" id="checkout-btn" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 hover:opacity-90 transition flex items-center justify-center gap-2">
+                        Proceed to Checkout <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHECKOUT MODAL -->
+    <div id="checkout-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+        <div class="glass-card rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-slate-700/80 shadow-2xl relative">
+            <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-800 text-slate-400 transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-white mb-2">Secure Checkout</h2>
+            <p class="text-slate-400 text-xs sm:text-sm mb-6">Complete your purchase to instantly unlock download links.</p>
+            
+            <form id="checkout-form" onsubmit="handlePaymentSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Full Name</label>
+                    <input type="text" id="checkout-name" required value="Alex Morgan" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Email Address (for automatic PPT delivery)</label>
+                    <input type="email" id="checkout-email" required value="alex.morgan@example.com" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Payment Method</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <label class="border border-indigo-500 bg-indigo-500/10 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer text-xs font-semibold text-white">
+                            <i data-lucide="credit-card" class="w-5 h-5 text-indigo-400 mb-1"></i> Credit Card
+                        </label>
+                        <label class="border border-slate-700 bg-slate-900 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer text-xs font-semibold text-slate-300 hover:border-slate-500">
+                            <i data-lucide="smartphone" class="w-5 h-5 text-cyan-400 mb-1"></i> UPI / QR
+                        </label>
+                        <label class="border border-slate-700 bg-slate-900 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer text-xs font-semibold text-slate-300 hover:border-slate-500">
+                            <i data-lucide="globe" class="w-5 h-5 text-violet-400 mb-1"></i> PayPal
+                        </label>
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-600 to-cyan-600 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 hover:opacity-90 transition flex items-center justify-center gap-2">
+                        <i data-lucide="lock" class="w-4 h-4"></i> Pay <span id="checkout-modal-amount">₹0.00</span> & Download PPTs
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PAYMENT SUCCESS / MY PURCHASES MODAL -->
+    <div id="purchases-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+        <div class="glass-card rounded-3xl max-w-2xl w-full p-6 sm:p-8 border border-slate-700/80 shadow-2xl relative">
+            <button onclick="closePurchasesModal()" class="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-800 text-slate-300 transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-500/30">
+                    <i data-lucide="check-circle" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-extrabold text-white">My Purchased Presentations</h2>
+                <p class="text-slate-400 text-xs sm:text-sm">Download your presentation decks and resources anytime.</p>
+            </div>
+            
+            <div id="purchased-items-list" class="space-y-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD / EDIT PPT MODAL (ADMIN) -->
+    <div id="admin-ppt-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+        <div class="glass-card rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-slate-700/80 shadow-2xl relative">
+            <button onclick="closeAddPPTModal()" class="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-800 text-slate-300 transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h2 id="admin-modal-title" class="text-xl sm:text-2xl font-extrabold text-white mb-2">Add New PPT Deck</h2>
+            <p class="text-slate-400 text-xs sm:text-sm mb-6">Fill in presentation details and upload product photo.</p>
+            
+            <form id="admin-ppt-form" onsubmit="handleSavePPT(event)" class="space-y-4">
+                <input type="hidden" id="edit-ppt-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Presentation Title</label>
+                    <input type="text" id="ppt-title-input" required placeholder="e.g. AI Startup Pitch Deck" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Category</label>
+                        <select id="ppt-category-input" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                            <option value="Business">Business</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Education">Education</option>
+                            <option value="Medical">Medical</option>
+                            <option value="Creative">Creative</option>
+                            <option value="Marketing">Marketing</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Price (₹)</label>
+                        <input type="number" step="0.01" id="ppt-price-input" required placeholder="2400.00" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Description</label>
+                    <textarea id="ppt-desc-input" rows="3" required placeholder="Describe slide layouts, animations, and use-cases..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-indigo-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Upload Product Photo</label>
+                    <input type="file" id="ppt-image-input" accept="image/*" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer">
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 hover:opacity-90 transition">
+                        Save Presentation Deck
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADD / EDIT SLIDER BANNER MODAL (ADMIN) -->
+    <div id="admin-slider-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+        <div class="glass-card rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-slate-700/80 shadow-2xl relative">
+            <button onclick="closeAddSliderModal()" class="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-800 text-slate-300 transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h2 id="admin-slider-modal-title" class="text-xl sm:text-2xl font-extrabold text-white mb-2">Add New Hero Slide</h2>
+            <p class="text-slate-400 text-xs sm:text-sm mb-6">Upload slide background and configure text content.</p>
+            
+            <form id="admin-slider-form" onsubmit="handleSaveSlider(event)" class="space-y-4">
+                <input type="hidden" id="edit-slider-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Badge Text</label>
+                    <input type="text" id="slider-badge-input" required placeholder="e.g. Next-Gen 3D Presentation Decks" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Heading Title (Use HTML for colors if needed)</label>
+                    <input type="text" id="slider-title-input" required placeholder="Supercharge Your Pitches With Immersive PPTs" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Description Subtext</label>
+                    <textarea id="slider-desc-input" rows="2" required placeholder="Hand-crafted, professionally animated PowerPoint templates..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-indigo-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Upload Banner Background Image</label>
+                    <input type="file" id="slider-image-input" accept="image/*" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer">
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 hover:opacity-90 transition">
+                        Save Slide Banner
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast-notification" class="fixed bottom-6 right-6 z-50 glass px-5 py-3.5 rounded-2xl border border-indigo-500/40 shadow-2xl flex items-center gap-3 transform translate-y-32 opacity-0 transition-all duration-300">
+        <div id="toast-icon-container" class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <i data-lucide="check" class="w-4 h-4"></i>
+        </div>
+        <div>
+            <h4 id="toast-title" class="text-sm font-bold text-white">Success</h4>
+            <p id="toast-message" class="text-xs text-slate-300">Action completed successfully.</p>
+        </div>
     </div>
 
     <script>
-    function sendOrder() {
-        // ⚠️ IS LINE ME APNA WHATSAPP NUMBER DALEIN (Country Code 91 ke saath)
-        var whatsappNumber = "91XXXXXXXXXX"; 
+        // --- MOCK DATABASE & LOCALSTORAGE PERSISTENCE FIX ---
+        let defaultPptsData = [
+            {
+                id: 1,
+                title: "Nexus AI Pitch Deck Pro",
+                category: "Technology",
+                price: 2400.00,
+                rating: 4.9,
+                sales: 342,
+                image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80",
+                description: "Futuristic AI presentation deck with 50+ fully animated slides, dark mode aesthetics, and high-tech charts.",
+                slides: [
+                    "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80"
+                ]
+            },
+            {
+                id: 2,
+                title: "Venture Capital Growth Master",
+                category: "Business",
+                price: 2900.00,
+                rating: 4.8,
+                sales: 215,
+                image: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=800&q=80",
+                description: "Comprehensive financial projection and business model template trusted by elite startup founders.",
+                slides: [
+                    "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=800&q=80"
+                ]
+            },
+            {
+                id: 3,
+                title: "Neo-SaaS Startup Deck",
+                category: "Technology",
+                price: 1999.00,
+                rating: 4.7,
+                sales: 189,
+                image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80",
+                description: "Sleek SaaS architecture presentation with customer acquisition metrics and product roadmap slides.",
+                slides: [
+                    "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80"
+                ]
+            },
+            {
+                id: 4,
+                title: "EdTech Interactive Learning",
+                category: "Education",
+                price: 1499.00,
+                rating: 4.9,
+                sales: 140,
+                image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80",
+                description: "Engaging educational slide deck featuring gamification layouts, quizzes, and classroom concepts.",
+                slides: [
+                    "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80"
+                ]
+            },
+            {
+                id: 5,
+                title: "BioHealth Medical Research",
+                category: "Medical",
+                price: 3200.00,
+                rating: 4.9,
+                sales: 98,
+                image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80",
+                description: "Professional medical research and clinical trial presentation deck with high-res anatomical layouts.",
+                slides: [
+                    "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
+                ]
+            },
+            {
+                id: 6,
+                title: "Cyberpunk Creative Portfolio",
+                category: "Creative",
+                price: 2400.00,
+                rating: 4.6,
+                sales: 120,
+                image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+                description: "Bold and artistic portfolio presentation for design studios, agencies, and digital creators.",
+                slides: [
+                    "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80"
+                ]
+            }
+        ];
 
-        var name = document.getElementById("name").value.trim();
-        var phone = document.getElementById("phone").value.trim();
-        var product = document.getElementById("product").value;
-        var address = document.getElementById("address").value.trim();
+        let defaultSlidersData = [
+            {
+                id: 1,
+                badge: "Next-Gen 3D Presentation Decks",
+                title: "Supercharge Your Pitches With <span class='bg-gradient-to-r from-cyan-400 to-indigo-500 bg-clip-text text-transparent'>Immersive PPTs</span>",
+                description: "Hand-crafted, professionally animated PowerPoint templates designed for entrepreneurs, tech leads, educators, and creative visionaries.",
+                image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80"
+            },
+            {
+                id: 2,
+                badge: "Trusted By 3,800+ Founders",
+                title: "Elevate Your Startup With <span class='bg-gradient-to-r from-violet-400 to-pink-500 bg-clip-text text-transparent'>Venture Capital Decks</span>",
+                description: "Secure funding faster with meticulously structured financial sheets, pitch outlines, and sleek typography.",
+                image: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=1200&q=80"
+            },
+            {
+                id: 3,
+                badge: "Creative & Modern Layouts",
+                title: "Unlock Your Potential With <span class='bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent'>Interactive Slides</span>",
+                description: "Engage your audience with futuristic slide designs, custom vector animations, and stunning color schemes.",
+                image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80"
+            }
+        ];
 
-        if(name === "" || phone === "" || address === "") {
-            alert("Kripya saari jankari sahi se bharein!");
-            return;
+        // Load or initialize persistent storage correctly without auto-overwriting user deletions
+        let pptsData = localStorage.getItem('nexus_ppts_data') ? JSON.parse(localStorage.getItem('nexus_ppts_data')) : defaultPptsData;
+        let slidersData = localStorage.getItem('nexus_sliders_data') ? JSON.parse(localStorage.getItem('nexus_sliders_data')) : defaultSlidersData;
+
+        function savePpts() {
+            try {
+                localStorage.setItem('nexus_ppts_data', JSON.stringify(pptsData));
+            } catch (e) {
+                console.error("Storage quota exceeded:", e);
+            }
         }
 
-        // WhatsApp Message Text
-        var message = "🛍️ *NAYA ORDER AAYA HAI!*%0A%0A" +
-                      "👤 *Naam:* " + encodeURIComponent(name) + "%0A" +
-                      "📞 *Phone:* " + encodeURIComponent(phone) + "%0A" +
-                      "📦 *Item:* " + encodeURIComponent(product) + "%0A" +
-                      "🏠 *Pata:* " + encodeURIComponent(address);
+        function saveSliders() {
+            try {
+                localStorage.setItem('nexus_sliders_data', JSON.stringify(slidersData));
+            } catch (e) {
+                console.error("Storage quota exceeded:", e);
+            }
+        }
 
-        // WhatsApp Link Open Karne ka Logic (PC aur Mobile Dono par chalega)
-        var finalUrl = "https://wa.me/" + whatsappNumber + "?text=" + message;
-        window.open(finalUrl, '_blank');
-    }
+        let cart = [];
+        let purchasedItems = [];
+        let ordersData = [
+            { id: "ORD-9482", customer: "Alex Morgan", items: "Nexus AI Pitch Deck Pro", amount: "₹2,400.00", status: "Completed", date: "Today, 4:15 PM" },
+            { id: "ORD-9481", customer: "Sarah Jenkins", items: "Venture Capital Growth", amount: "₹2,900.00", status: "Completed", date: "Today, 2:10 PM" },
+            { id: "ORD-9480", customer: "David Chen", items: "Neo-SaaS Startup Deck", amount: "₹1,999.00", status: "Processing", date: "Yesterday" }
+        ];
+        let customersData = [
+            { name: "Alex Morgan", email: "alex.morgan@example.com", decks: 3, spent: "₹7,300.00", date: "Jan 12, 2026" },
+            { name: "Sarah Jenkins", email: "sarah.j@example.com", decks: 1, spent: "₹2,900.00", date: "Feb 04, 2026" },
+            { name: "David Chen", email: "david.c@example.com", decks: 2, spent: "₹4,800.00", date: "Mar 01, 2026" }
+        ];
+        let currentFilter = 'All';
+        let currentSearchQuery = '';
+        
+        let currentSlideIndex = 0;
+        let sliderInterval = null;
+
+        window.onload = function() {
+            initThreeBackground();
+            initHeroSlider();
+            startAutoSlide();
+            renderPPTCatalog();
+            updateCartBadge();
+            renderAdminProducts();
+            renderAdminSliders();
+            renderAdminOrders();
+            renderAdminCustomers();
+            lucide.createIcons();
+        };
+
+        function initHeroSlider() {
+            const container = document.getElementById('hero-slider-container');
+            const dotsContainer = document.getElementById('slider-dots');
+            
+            if (!container || !dotsContainer) return;
+
+            container.innerHTML = '';
+            dotsContainer.innerHTML = '';
+
+            slidersData.forEach((slide, index) => {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = `absolute inset-0 transition-opacity duration-700 ease-in-out flex items-center p-5 sm:p-8 md:p-12 ${index === currentSlideIndex ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'}`;
+                slideDiv.style.background = `linear-gradient(90deg, rgba(3, 7, 18, 0.95) 0%, rgba(15, 23, 42, 0.85) 60%, rgba(15, 23, 42, 0.4) 100%), url('${slide.image}') center/cover no-repeat`;
+                
+                slideDiv.innerHTML = `
+                    <div class="relative z-10 max-w-2xl">
+                        <span class="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-[11px] sm:text-xs font-semibold bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 mb-4 sm:mb-6">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ${slide.badge}
+                        </span>
+                        <h1 class="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-3 sm:mb-4 leading-tight text-white">
+                            ${slide.title}
+                        </h1>
+                        <p class="text-slate-300 text-xs sm:text-base mb-6 sm:mb-8 line-clamp-3">
+                            ${slide.description}
+                        </p>
+                        <div class="flex flex-wrap gap-3 sm:gap-4">
+                            <a href="#ppt-catalog" class="px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold shadow-lg shadow-indigo-600/30 hover:opacity-90 transition flex items-center gap-2 text-xs sm:text-sm">
+                                Browse Decks <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                            <button onclick="openPurchasesModal()" class="px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl glass hover:bg-slate-800 font-semibold transition border border-slate-700 text-xs sm:text-sm">
+                                Access My Files
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(slideDiv);
+
+                const dot = document.createElement('button');
+                dot.className = `w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all ${index === currentSlideIndex ? 'bg-cyan-400 w-6 sm:w-8' : 'bg-slate-600 hover:bg-slate-500'}`;
+                dot.onclick = () => goToSlide(index);
+                dotsContainer.appendChild(dot);
+            });
+
+            lucide.createIcons();
+        }
+
+        function nextSlide() {
+            currentSlideIndex = (currentSlideIndex + 1) % slidersData.length;
+            initHeroSlider();
+            resetAutoSlide();
+        }
+
+        function prevSlide() {
+            currentSlideIndex = (currentSlideIndex - 1 + slidersData.length) % slidersData.length;
+            initHeroSlider();
+            resetAutoSlide();
+        }
+
+        function goToSlide(index) {
+            currentSlideIndex = index;
+            initHeroSlider();
+            resetAutoSlide();
+        }
+
+        function startAutoSlide() {
+            sliderInterval = setInterval(() => {
+                currentSlideIndex = (currentSlideIndex + 1) % slidersData.length;
+                initHeroSlider();
+            }, 4500);
+        }
+
+        function resetAutoSlide() {
+            clearInterval(sliderInterval);
+            startAutoSlide();
+        }
+
+        function initThreeBackground() {
+            const canvas = document.getElementById('bg-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 700;
+            const posArray = new Float32Array(particlesCount * 3);
+
+            for(let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 15;
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.025,
+                color: 0x6366f1,
+                transparent: true,
+                opacity: 0.7
+            });
+
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+
+            camera.position.z = 5;
+
+            let mouseX = 0;
+            let mouseY = 0;
+            window.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX / window.innerWidth) - 0.5;
+                mouseY = (event.clientY / window.innerHeight) - 0.5;
+            });
+
+            function animate() {
+                requestAnimationFrame(animate);
+                particlesMesh.rotation.x += 0.0005 + (mouseY * 0.05);
+                particlesMesh.rotation.y += 0.0008 + (mouseX * 0.05);
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        function promptAdminLogin() {
+            const isAdminLoggedIn = sessionStorage.getItem('nexus_admin_auth');
+            if (isAdminLoggedIn === 'true') {
+                switchView('admin');
+            } else {
+                document.getElementById('admin-pin-modal').classList.remove('hidden');
+            }
+        }
+
+        function closeAdminPinModal() {
+            document.getElementById('admin-pin-modal').classList.add('hidden');
+        }
+
+        function verifyAdminPin(event) {
+            event.preventDefault();
+            const pin = document.getElementById('admin-secret-pin').value;
+            if (pin === "NEXUS@ADMIN999") {
+                sessionStorage.setItem('nexus_admin_auth', 'true');
+                closeAdminPinModal();
+                switchView('admin');
+                showToast("Welcome Owner!", "Admin access granted successfully.", "shield");
+            } else {
+                showToast("Access Denied", "Incorrect secret passcode!", "error");
+            }
+            document.getElementById('admin-secret-pin').value = '';
+        }
+
+        function logoutAdmin() {
+            sessionStorage.removeItem('nexus_admin_auth');
+            switchView('customer');
+            showToast("Logged Out", "Admin session locked securely.", "info");
+        }
+
+        function switchView(viewName) {
+            const customerView = document.getElementById('customer-view');
+            const adminView = document.getElementById('admin-view');
+            if (viewName === 'customer') {
+                customerView.classList.remove('hidden');
+                adminView.classList.add('hidden');
+            } else if (viewName === 'admin') {
+                customerView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+            }
+        }
+
+        function renderPPTCatalog() {
+            const grid = document.getElementById('ppt-grid');
+            grid.innerHTML = '';
+
+            let filtered = pptsData.filter(item => {
+                const matchesCat = currentFilter === 'All' || item.category === currentFilter;
+                const matchesSearch = item.title.toLowerCase().includes(currentSearchQuery.toLowerCase()) || 
+                                      item.description.toLowerCase().includes(currentSearchQuery.toLowerCase());
+                return matchesCat && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-16 text-center glass-card rounded-2xl">
+                        <i data-lucide="folder-search" class="w-12 h-12 text-slate-500 mx-auto mb-3"></i>
+                        <h3 class="text-base sm:text-lg font-bold text-slate-300">No presentations found</h3>
+                        <p class="text-xs sm:text-sm text-slate-500">Try adjusting your category filter or search keyword.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            filtered.forEach(ppt => {
+                const card = document.createElement('div');
+                card.className = 'glass-card rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col group border border-slate-700/50 hover:border-indigo-500/50 transition-all duration-300 shadow-xl';
+                card.innerHTML = `
+                    <div class="relative overflow-hidden aspect-video cursor-pointer" onclick="openPPTModal(${ppt.id})">
+                        <img src="${ppt.image}" alt="${ppt.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x400/0f172a/6366f1?text=NexusPPT'">
+                        <div class="absolute top-2.5 left-2.5 bg-slate-900/80 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold text-cyan-400 border border-slate-700">
+                            ${ppt.category}
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-4">
+                            <span class="text-xs font-semibold text-white bg-indigo-600/90 px-3 py-1.5 rounded-xl shadow-lg flex items-center gap-1">
+                                <i data-lucide="eye" class="w-3.5 h-3.5"></i> Preview Slides
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-4 sm:p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-1 text-amber-400 text-xs font-bold">
+                                    <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i> ${ppt.rating}
+                                </div>
+                                <span class="text-[11px] sm:text-xs text-slate-400">${ppt.sales} sales</span>
+                            </div>
+                            <h3 class="font-bold text-base sm:text-lg text-white mb-1.5 sm:mb-2 group-hover:text-cyan-400 transition cursor-pointer line-clamp-1" onclick="openPPTModal(${ppt.id})">${ppt.title}</h3>
+                            <p class="text-xs text-slate-400 line-clamp-2 mb-4">${ppt.description}</p>
+                        </div>
+                        <div class="pt-3 sm:pt-4 border-t border-slate-800/80 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] sm:text-xs text-slate-500 block">Price</span>
+                                <span class="text-lg sm:text-xl font-extrabold text-white">₹${Number(ppt.price).toFixed(2)}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="addToCart(${ppt.id})" class="p-2 sm:p-2.5 rounded-xl glass hover:bg-slate-800 text-slate-200 transition" title="Add to Cart">
+                                    <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="buyNow(${ppt.id})" class="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:opacity-90 text-white font-semibold text-[11px] sm:text-xs transition flex items-center gap-1 shadow-md shadow-indigo-600/30">
+                                    Buy Now <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function filterCategory(category) {
+            currentFilter = category;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                if (btn.innerText.includes(category) || (category === 'All' && btn.innerText.includes('All Decks'))) {
+                    btn.className = 'category-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium bg-indigo-600 text-white shadow-md transition whitespace-nowrap';
+                } else {
+                    btn.className = 'category-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium glass hover:bg-slate-800 text-slate-300 transition whitespace-nowrap';
+                }
+            });
+            renderPPTCatalog();
+        }
+
+        function handleSearch() {
+            currentSearchQuery = document.getElementById('search-input').value;
+            renderPPTCatalog();
+        }
+
+        function openPPTModal(id) {
+            const ppt = pptsData.find(p => p.id === id);
+            if (!ppt) return;
+
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                    <div>
+                        <div class="rounded-2xl overflow-hidden aspect-video mb-3 sm:mb-4 border border-slate-700 shadow-xl">
+                            <img id="main-preview-img" src="${ppt.image}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                            ${ppt.slides.map((slide, idx) => `
+                                <img src="${slide}" onclick="document.getElementById('main-preview-img').src='${slide}'" class="w-16 h-12 sm:w-20 sm:h-14 object-cover rounded-xl cursor-pointer border-2 border-slate-700 hover:border-cyan-400 transition">
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="flex flex-col justify-between">
+                        <div>
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-3">${ppt.category}</span>
+                            <h2 class="text-xl sm:text-2xl font-extrabold text-white mb-2">${ppt.title}</h2>
+                            <div class="flex items-center gap-2 mb-4 text-[11px] sm:text-xs text-slate-400">
+                                <span class="flex items-center gap-1 text-amber-400 font-bold"><i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i> ${ppt.rating}</span>
+                                <span>•</span>
+                                <span>${ppt.sales} Downloads</span>
+                                <span>•</span>
+                                <span class="text-emerald-400 font-semibold">Instant Download (.pptx)</span>
+                            </div>
+                            <p class="text-xs sm:text-sm text-slate-300 mb-6 leading-relaxed">${ppt.description}</p>
+                            <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 mb-6 space-y-2">
+                                <div class="flex items-center gap-2 text-xs text-slate-300"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> 100% Editable vector shapes</div>
+                                <div class="flex items-center gap-2 text-xs text-slate-300"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> 16:9 HD Widescreen layouts</div>
+                                <div class="flex items-center gap-2 text-xs text-slate-300"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Modern typography & color palette</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+                            <div>
+                                <span class="text-[10px] sm:text-xs text-slate-500 block">Total Price</span>
+                                <span class="text-xl sm:text-2xl font-extrabold text-white">₹${Number(ppt.price).toFixed(2)}</span>
+                            </div>
+                            <div class="flex gap-2 sm:gap-3">
+                                <button onclick="closePPTModal(); addToCart(${ppt.id}); toggleCartDrawer(true);" class="px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl glass hover:bg-slate-800 font-semibold text-[11px] sm:text-xs transition flex items-center gap-1.5">
+                                    <i data-lucide="shopping-cart" class="w-4 h-4"></i> Add to Cart
+                                </button>
+                                <button onclick="closePPTModal(); buyNow(${ppt.id});" class="px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-xs sm:text-sm shadow-lg shadow-indigo-600/30 hover:opacity-90 transition flex items-center gap-2">
+                                    <i data-lucide="zap" class="w-4 h-4"></i> Buy Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('ppt-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closePPTModal() {
+            document.getElementById('ppt-modal').classList.add('hidden');
+        }
+
+        function addToCart(id) {
+            const ppt = pptsData.find(p => p.id === id);
+            if (!ppt) return;
+
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                showToast("Already in Cart", `${ppt.title} is already added in your cart.`, "info");
+            } else {
+                cart.push(ppt);
+                showToast("Added to Cart", `${ppt.title} added successfully!`, "success");
+            }
+            updateCartBadge();
+            renderCartItems();
+        }
+
+        function buyNow(id) {
+            const ppt = pptsData.find(p => p.id === id);
+            if (!ppt) return;
+            
+            const message = encodeURIComponent(`Hello, I want to buy this presentation: ${ppt.title} (Price: ₹${ppt.price}). Please share the details.`);
+            window.location.href = `https://wa.me/7321813389?text=${message}`;
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            updateCartBadge();
+            renderCartItems();
+            showToast("Removed", "Item removed from cart", "info");
+        }
+
+        function updateCartBadge() {
+            document.getElementById('cart-badge').innerText = cart.length;
+            document.getElementById('cart-item-count').innerText = cart.length;
+        }
+
+        function toggleCartDrawer(isOpen) {
+            const drawer = document.getElementById('cart-drawer');
+            if (isOpen) {
+                drawer.classList.remove('hidden');
+                renderCartItems();
+            } else {
+                drawer.classList.add('hidden');
+            }
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cart-items-container');
+            container.innerHTML = '';
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="py-12 text-center">
+                        <i data-lucide="shopping-bag" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
+                        <p class="text-sm font-semibold text-slate-400">Your cart is empty</p>
+                        <p class="text-xs text-slate-600 mt-1">Add presentation decks to start checkout.</p>
+                    </div>
+                `;
+                document.getElementById('cart-subtotal').innerText = '₹0.00';
+                document.getElementById('cart-discount').innerText = '-₹0.00';
+                document.getElementById('cart-total').innerText = '₹0.00';
+                lucide.createIcons();
+                return;
+            }
+
+            let subtotal = 0;
+            cart.forEach(item => {
+                subtotal += Number(item.price);
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between pt-4 first:pt-0';
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <img src="${item.image}" class="w-14 h-10 object-cover rounded-lg border border-slate-700">
+                        <div>
+                            <h4 class="text-xs sm:text-sm font-bold text-white">${item.title}</h4>
+                            <span class="text-xs text-slate-400">₹${Number(item.price).toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <button onclick="removeFromCart(${item.id})" class="p-2 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-rose-400 transition">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('cart-subtotal').innerText = `₹${subtotal.toFixed(2)}`;
+            document.getElementById('cart-discount').innerText = `-₹0.00`;
+            document.getElementById('cart-total').innerText = `₹${subtotal.toFixed(2)}`;
+            lucide.createIcons();
+        }
+
+        function openCheckoutModal() {
+            if (cart.length === 0) {
+                showToast("Cart Empty", "Please add items to your cart before checking out.", "error");
+                return;
+            }
+            toggleCartDrawer(false);
+            let total = cart.reduce((sum, item) => sum + Number(item.price), 0);
+            document.getElementById('checkout-modal-amount').innerText = `₹${total.toFixed(2)}`;
+            document.getElementById('checkout-modal').classList.remove('hidden');
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkout-modal').classList.add('hidden');
+        }
+
+        function handlePaymentSubmit(event) {
+            event.preventDefault();
+            closeCheckoutModal();
+
+            purchasedItems.push(...cart);
+            cart = [];
+            updateCartBadge();
+
+            showToast("Payment Successful!", "Your order is confirmed & PPTs are ready for download.", "success");
+            
+            setTimeout(() => {
+                openPurchasesModal();
+            }, 600);
+        }
+
+        function openPurchasesModal() {
+            const list = document.getElementById('purchased-items-list');
+            list.innerHTML = '';
+
+            if (purchasedItems.length === 0) {
+                list.innerHTML = `
+                    <div class="py-12 text-center">
+                        <i data-lucide="folder-down" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
+                        <p class="text-sm font-semibold text-slate-400">No purchased presentations yet</p>
+                        <p class="text-xs text-slate-600 mt-1">Complete a checkout to download PPT files (.pptx).</p>
+                    </div>
+                `;
+            } else {
+                purchasedItems.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'glass-card p-3 sm:p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-slate-700/60';
+                    div.innerHTML = `
+                        <div class="flex items-center space-x-3 sm:space-x-4">
+                            <img src="${item.image}" class="w-14 h-10 sm:w-16 sm:h-12 object-cover rounded-xl border border-slate-700">
+                            <div>
+                                <h4 class="font-bold text-xs sm:text-sm text-white">${item.title}</h4>
+                                <span class="text-[10px] sm:text-xs text-emerald-400 flex items-center gap-1 mt-0.5">
+                                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> License Active • Ready for Download
+                                </span>
+                            </div>
+                        </div>
+                        <button onclick="simulateDownload('${item.title}')" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-lg shadow-cyan-500/20">
+                            <i data-lucide="download" class="w-4 h-4"></i> Download .pptx
+                        </button>
+                    `;
+                    list.appendChild(div);
+                });
+            }
+
+            document.getElementById('purchases-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closePurchasesModal() {
+            document.getElementById('purchases-modal').classList.add('hidden');
+        }
+
+        function simulateDownload(title) {
+            showToast("Downloading Presentation", `Preparing ${title}.pptx for secure download...`, "success");
+            setTimeout(() => {
+                showToast("Download Complete!", `${title}.pptx downloaded successfully.`, "success");
+            }, 1500);
+        }
+
+        function switchAdminTab(tabName) {
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.className = 'admin-tab px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-400 hover:bg-slate-800 transition whitespace-nowrap';
+            });
+            document.getElementById(`admin-tab-${tabName}`).className = 'admin-tab px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 text-white transition whitespace-nowrap';
+
+            document.querySelectorAll('.admin-section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`admin-content-${tabName}`).classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function renderAdminProducts() {
+            const tbody = document.getElementById('admin-product-table-body');
+            tbody.innerHTML = '';
+
+            pptsData.forEach(ppt => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition';
+                tr.innerHTML = `
+                    <td class="p-3 sm:p-4 flex items-center space-x-3">
+                        <img src="${ppt.image}" class="w-10 h-7 sm:w-12 sm:h-9 object-cover rounded-lg border border-slate-700" onerror="this.src='https://placehold.co/600x400/0f172a/6366f1?text=NexusPPT'">
+                        <span class="font-bold text-white text-xs sm:text-sm">${ppt.title}</span>
+                    </td>
+                    <td class="p-3 sm:p-4"><span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs bg-slate-800 text-cyan-400">${ppt.category}</span></td>
+                    <td class="p-3 sm:p-4 font-semibold text-white text-xs sm:text-sm">₹${Number(ppt.price).toFixed(2)}</td>
+                    <td class="p-3 sm:p-4 text-slate-300 text-xs sm:text-sm">${ppt.sales}</td>
+                    <td class="p-3 sm:p-4 text-amber-400 font-bold flex items-center gap-1 text-xs sm:text-sm"><i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i> ${ppt.rating}</td>
+                    <td class="p-3 sm:p-4 text-right space-x-1 sm:space-x-2">
+                        <button onclick="openEditPPTModal(${ppt.id})" class="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-400 transition" title="Edit">
+                            <i data-lucide="edit-3" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                        </button>
+                        <button onclick="deletePPT(${ppt.id})" class="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-rose-400 transition" title="Delete">
+                            <i data-lucide="trash" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('stat-ppts').innerText = pptsData.length;
+            document.getElementById('admin-product-count').innerText = `Showing ${pptsData.length} decks`;
+            lucide.createIcons();
+        }
+
+        function renderAdminSliders() {
+            const tbody = document.getElementById('admin-slider-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            slidersData.forEach(slide => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition';
+                tr.innerHTML = `
+                    <td class="p-3 sm:p-4">
+                        <img src="${slide.image}" class="w-16 h-10 sm:w-20 sm:h-12 object-cover rounded-lg border border-slate-700" onerror="this.src='https://placehold.co/600x400/0f172a/6366f1?text=Slide'">
+                    </td>
+                    <td class="p-3 sm:p-4"><span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">${slide.badge}</span></td>
+                    <td class="p-3 sm:p-4 text-white font-medium max-w-xs truncate text-xs sm:text-sm">${slide.title}</td>
+                    <td class="p-3 sm:p-4 text-right space-x-1 sm:space-x-2">
+                        <button onclick="openEditSliderModal(${slide.id})" class="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-400 transition" title="Edit">
+                            <i data-lucide="edit-3" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                        </button>
+                        <button onclick="deleteSlider(${slide.id})" class="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-rose-400 transition" title="Delete">
+                            <i data-lucide="trash" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        function renderAdminOrders() {
+            const tbody = document.getElementById('admin-orders-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            ordersData.forEach(order => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition';
+                tr.innerHTML = `
+                    <td class="p-3 sm:p-4 font-mono font-bold text-indigo-400 text-xs sm:text-sm">${order.id}</td>
+                    <td class="p-3 sm:p-4 text-white font-medium text-xs sm:text-sm">${order.customer}</td>
+                    <td class="p-3 sm:p-4 text-slate-300 text-xs sm:text-sm">${order.items}</td>
+                    <td class="p-3 sm:p-4 font-bold text-cyan-400 text-xs sm:text-sm">${order.amount}</td>
+                    <td class="p-3 sm:p-4"><span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold ${order.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">${order.status}</span></td>
+                    <td class="p-3 sm:p-4 text-slate-400 text-[11px] sm:text-xs">${order.date}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderAdminCustomers() {
+            const tbody = document.getElementById('admin-customers-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            customersData.forEach(cust => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition';
+                tr.innerHTML = `
+                    <td class="p-3 sm:p-4 font-bold text-white text-xs sm:text-sm">${cust.name}</td>
+                    <td class="p-3 sm:p-4 text-slate-300 text-xs sm:text-sm">${cust.email}</td>
+                    <td class="p-3 sm:p-4 text-slate-300 text-xs sm:text-sm">${cust.decks} Decks</td>
+                    <td class="p-3 sm:p-4 font-bold text-emerald-400 text-xs sm:text-sm">${cust.spent}</td>
+                    <td class="p-3 sm:p-4 text-slate-400 text-[11px] sm:text-xs">${cust.date}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openAddPPTModal() {
+            document.getElementById('admin-modal-title').innerText = "Add New PPT Deck";
+            document.getElementById('edit-ppt-id').value = '';
+            document.getElementById('ppt-title-input').value = '';
+            document.getElementById('ppt-price-input').value = '';
+            document.getElementById('ppt-desc-input').value = '';
+            document.getElementById('admin-ppt-modal').classList.remove('hidden');
+        }
+
+        function openEditPPTModal(id) {
+            const ppt = pptsData.find(p => p.id === id);
+            if (!ppt) return;
+            document.getElementById('admin-modal-title').innerText = "Edit PPT Deck";
+            document.getElementById('edit-ppt-id').value = ppt.id;
+            document.getElementById('ppt-title-input').value = ppt.title;
+            document.getElementById('ppt-category-input').value = ppt.category;
+            document.getElementById('ppt-price-input').value = ppt.price;
+            document.getElementById('ppt-desc-input').value = ppt.description;
+            document.getElementById('admin-ppt-modal').classList.remove('hidden');
+        }
+
+        function closeAddPPTModal() {
+            document.getElementById('admin-ppt-modal').classList.add('hidden');
+        }
+
+        function handleSavePPT(event) {
+            event.preventDefault();
+            const editId = document.getElementById('edit-ppt-id').value;
+            const title = document.getElementById('ppt-title-input').value;
+            const category = document.getElementById('ppt-category-input').value;
+            const price = parseFloat(document.getElementById('ppt-price-input').value);
+            const description = document.getElementById('ppt-desc-input').value;
+            const imageFile = document.getElementById('ppt-image-input').files[0];
+
+            const saveProductData = (imageUrl) => {
+                if (editId !== "") {
+                    const ppt = pptsData.find(p => p.id === Number(editId));
+                    if (ppt) {
+                        ppt.title = title;
+                        ppt.category = category;
+                        ppt.price = price;
+                        ppt.description = description;
+                        if (imageUrl) ppt.image = imageUrl;
+                    }
+                    showToast("PPT Updated", "Presentation deck updated successfully.", "success");
+                } else {
+                    const newPPT = {
+                        id: Date.now(),
+                        title,
+                        category,
+                        price,
+                        rating: 5.0,
+                        sales: 0,
+                        image: imageUrl || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80',
+                        description,
+                        slides: [imageUrl || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80']
+                    };
+                    pptsData.push(newPPT);
+                    showToast("PPT Created", "New presentation deck added to catalog.", "success");
+                }
+
+                savePpts();
+                closeAddPPTModal();
+                renderPPTCatalog();
+                renderAdminProducts();
+            };
+
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    saveProductData(e.target.result);
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                let existingImage = 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80';
+                if (editId !== "") {
+                    const ppt = pptsData.find(p => p.id === Number(editId));
+                    if (ppt) existingImage = ppt.image;
+                }
+                saveProductData(existingImage);
+            }
+        }
+
+        function deletePPT(id) {
+            if (confirm("Are you sure you want to delete this presentation deck?")) {
+                pptsData = pptsData.filter(p => p.id !== id);
+                savePpts();
+                renderPPTCatalog();
+                renderAdminProducts();
+                showToast("Deleted", "Presentation deck removed from store.", "error");
+            }
+        }
+
+        function openAddSliderModal() {
+            document.getElementById('admin-slider-modal-title').innerText = "Add New Hero Slide";
+            document.getElementById('edit-slider-id').value = '';
+            document.getElementById('slider-badge-input').value = '';
+            document.getElementById('slider-title-input').value = '';
+            document.getElementById('slider-desc-input').value = '';
+            document.getElementById('admin-slider-modal').classList.remove('hidden');
+        }
+
+        function openEditSliderModal(id) {
+            const slide = slidersData.find(s => s.id === id);
+            if (!slide) return;
+            document.getElementById('admin-slider-modal-title').innerText = "Edit Hero Slide";
+            document.getElementById('edit-slider-id').value = slide.id;
+            document.getElementById('slider-badge-input').value = slide.badge;
+            document.getElementById('slider-title-input').value = slide.title;
+            document.getElementById('slider-desc-input').value = slide.description;
+            document.getElementById('admin-slider-modal').classList.remove('hidden');
+        }
+
+        function closeAddSliderModal() {
+            document.getElementById('admin-slider-modal').classList.add('hidden');
+        }
+
+        function handleSaveSlider(event) {
+            event.preventDefault();
+            const editId = document.getElementById('edit-slider-id').value;
+            const badge = document.getElementById('slider-badge-input').value;
+            const title = document.getElementById('slider-title-input').value;
+            const description = document.getElementById('slider-desc-input').value;
+            const imageFile = document.getElementById('slider-image-input').files[0];
+
+            const saveSliderData = (imageUrl) => {
+                if (editId !== "") {
+                    const slide = slidersData.find(s => s.id === Number(editId));
+                    if (slide) {
+                        slide.badge = badge;
+                        slide.title = title;
+                        slide.description = description;
+                        if (imageUrl) slide.image = imageUrl;
+                    }
+                    showToast("Slide Updated", "Hero banner updated successfully.", "success");
+                } else {
+                    const newSlide = {
+                        id: Date.now(),
+                        badge,
+                        title,
+                        description,
+                        image: imageUrl || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80'
+                    };
+                    slidersData.push(newSlide);
+                    showToast("Slide Added", "New banner added to carousel.", "success");
+                }
+
+                saveSliders();
+                closeAddSliderModal();
+                initHeroSlider();
+                renderAdminSliders();
+            };
+
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    saveSliderData(e.target.result);
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                let existingImage = 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80';
+                if (editId !== "") {
+                    const slide = slidersData.find(s => s.id === Number(editId));
+                    if (slide) existingImage = slide.image;
+                }
+                saveSliderData(existingImage);
+            }
+        }
+
+        function deleteSlider(id) {
+            if (slidersData.length <= 1) {
+                showToast("Cannot Delete", "Kam se kam ek slide hona zaroori hai.", "error");
+                return;
+            }
+            if (confirm("Are you sure you want to delete this slide?")) {
+                slidersData = slidersData.filter(s => s.id !== id);
+                currentSlideIndex = 0;
+                saveSliders();
+                initHeroSlider();
+                renderAdminSliders();
+                showToast("Deleted", "Slide removed successfully.", "error");
+            }
+        }
+
+        function showToast(title, message, type = "success") {
+            const toast = document.getElementById('toast-notification');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-message').innerText = message;
+            
+            const iconContainer = document.getElementById('toast-icon-container');
+            if(type === "error") {
+                iconContainer.className = "w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center";
+                iconContainer.innerHTML = `<i data-lucide="alert-circle" class="w-4 h-4"></i>`;
+            } else if(type === "shield") {
+                iconContainer.className = "w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center";
+                iconContainer.innerHTML = `<i data-lucide="shield" class="w-4 h-4"></i>`;
+            } else {
+                iconContainer.className = "w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center";
+                iconContainer.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
+            }
+            lucide.createIcons();
+
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-32', 'opacity-0');
+            }, 3500);
+        }
     </script>
-
 </body>
 </html>
